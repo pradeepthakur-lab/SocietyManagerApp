@@ -6,21 +6,25 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import StatusChip from '../../components/StatusChip';
 import visitorService from '../../services/visitorService';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatDateTime, formatDate, formatTime } from '../../utils/formatDate';
 
-const DetailRow = ({ icon, label, value }) => (
-  <View style={styles.detailRow}>
-    <Icon name={icon} size={18} color={colors.textMuted} style={styles.detailIcon} />
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value || '—'}</Text>
-  </View>
-);
-
 const VisitorDetail = ({ route, navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+
+  const DetailRow = ({ icon, label, value }) => (
+    <View style={s.detailRow}>
+      <Icon name={icon} size={18} color={colors.textMuted} style={s.detailIcon} />
+      <Text style={s.detailLabel}>{label}</Text>
+      <Text style={s.detailValue}>{value || '—'}</Text>
+    </View>
+  );
   const { visitor } = route.params;
+  const { showToast } = useToast();
   const isActive = visitor.status === 'checked_in';
 
   const handleCheckout = async () => {
@@ -30,22 +34,21 @@ const VisitorDetail = ({ route, navigation }) => {
         text: 'Check Out',
         onPress: async () => {
           await visitorService.checkoutVisitor(visitor.id);
-          Alert.alert('Done', 'Visitor checked out successfully', [
-            { text: 'OK', onPress: () => navigation.goBack() },
-          ]);
+          showToast('Visitor checked out successfully', 'success');
+          navigation.goBack();
         },
       },
     ]);
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Visitor Details" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Header Card */}
-        <Card variant="elevated" style={styles.headerCard}>
-          <View style={styles.headerRow}>
-            <View style={[styles.avatar, {
+        <Card variant="elevated" style={s.headerCard}>
+          <View style={s.headerRow}>
+            <View style={[s.avatar, {
               backgroundColor: isActive ? colors.successLight : colors.surfaceLight,
             }]}>
               <Icon
@@ -54,9 +57,9 @@ const VisitorDetail = ({ route, navigation }) => {
                 color={isActive ? colors.success : colors.textMuted}
               />
             </View>
-            <View style={styles.headerInfo}>
-              <Text style={styles.visitorName}>{visitor.visitorName}</Text>
-              <Text style={styles.purpose}>{visitor.purpose}</Text>
+            <View style={s.headerInfo}>
+              <Text style={s.visitorName}>{visitor.visitorName}</Text>
+              <Text style={s.purpose}>{visitor.purpose}</Text>
             </View>
             <StatusChip
               status={isActive ? 'open' : 'resolved'}
@@ -66,7 +69,7 @@ const VisitorDetail = ({ route, navigation }) => {
         </Card>
 
         {/* Visit Details */}
-        <Text style={styles.sectionTitle}>Visit Information</Text>
+        <Text style={s.sectionTitle}>Visit Information</Text>
         <Card>
           <DetailRow icon="door" label="Flat" value={visitor.visitingFlat} />
           <DetailRow icon="account-check" label="Visiting" value={visitor.visitingResident} />
@@ -81,7 +84,7 @@ const VisitorDetail = ({ route, navigation }) => {
         </Card>
 
         {/* Timing */}
-        <Text style={styles.sectionTitle}>Timing</Text>
+        <Text style={s.sectionTitle}>Timing</Text>
         <Card>
           <DetailRow icon="login" label="Check In" value={formatDateTime(visitor.checkedInAt)} />
           <DetailRow
@@ -120,7 +123,7 @@ const VisitorDetail = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   headerCard: { padding: spacing.lg },

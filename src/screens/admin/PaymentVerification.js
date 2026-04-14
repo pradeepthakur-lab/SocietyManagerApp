@@ -6,13 +6,15 @@ import Card from '../../components/Card';
 import StatusChip from '../../components/StatusChip';
 import EmptyState from '../../components/EmptyState';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 
 const PaymentVerification = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { payments, loadPayments, loading } = useBilling();
 
   useEffect(() => {
@@ -36,26 +38,26 @@ const PaymentVerification = ({ navigation }) => {
 
   const renderPayment = ({ item }) => (
     <Card
-      style={styles.card}
+      style={s.card}
       onPress={() => navigation.navigate('PaymentDetail', { payment: item })}
     >
-      <View style={styles.row}>
-        <View style={styles.iconWrap}>
+      <View style={s.row}>
+        <View style={s.iconWrap}>
           <Icon
             name={getMethodIcon(item.paymentMethod)}
             size={22}
             color={colors.primary}
           />
         </View>
-        <View style={styles.info}>
-          <Text style={styles.name}>{item.userName}</Text>
-          <Text style={styles.meta}>
+        <View style={s.info}>
+          <Text style={s.name}>{item.userName}</Text>
+          <Text style={s.meta}>
             {item.flatNumber} • {item.paymentMethod.replace('_', ' ').toUpperCase()}
           </Text>
-          <Text style={styles.date}>{formatDate(item.submittedAt)}</Text>
+          <Text style={s.date}>{formatDate(item.submittedAt)}</Text>
         </View>
-        <View style={styles.right}>
-          <Text style={styles.amount}>{formatCurrency(item.amount)}</Text>
+        <View style={s.right}>
+          <Text style={s.amount}>{formatCurrency(item.amount)}</Text>
           <StatusChip status={item.status} />
         </View>
       </View>
@@ -63,7 +65,7 @@ const PaymentVerification = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Payment Verification"
         subtitle={`${pendingPayments.length} pending`}
@@ -73,7 +75,7 @@ const PaymentVerification = ({ navigation }) => {
         data={allPayments}
         keyExtractor={(item) => item.id}
         renderItem={renderPayment}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
@@ -87,7 +89,7 @@ const PaymentVerification = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: {
     paddingHorizontal: spacing.screenHorizontal,

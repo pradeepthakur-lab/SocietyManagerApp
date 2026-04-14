@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AdminStack from './AdminStack';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
@@ -14,6 +14,7 @@ import Settings from '../screens/admin/Settings';
 const Tab = createBottomTabNavigator();
 
 const AdminTabs = () => {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{

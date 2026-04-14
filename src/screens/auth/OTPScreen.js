@@ -13,13 +13,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 
 const OTP_LENGTH = 4;
 
 const OTPScreen = ({ route, navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { mobile, role } = route.params;
   const { verifyOTP, loginPending, error, clearError } = useAuth();
   const insets = useSafeAreaInsets();
@@ -72,34 +74,35 @@ const OTPScreen = ({ route, navigation }) => {
   const isComplete = otp.every((d) => d !== '');
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[s.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
+        behavior="padding"
+        style={s.flex}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         {/* Back button */}
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          style={s.backButton}
         >
           <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
-        <View style={styles.content}>
+        <View style={s.content}>
           {/* Icon */}
-          <View style={styles.iconContainer}>
+          <View style={s.iconContainer}>
             <Icon name="shield-lock-outline" size={40} color={colors.primary} />
           </View>
 
-          <Text style={styles.title}>Verify OTP</Text>
-          <Text style={styles.subtitle}>
+          <Text style={s.title}>Verify OTP</Text>
+          <Text style={s.subtitle}>
             Enter the 4-digit code sent to{'\n'}
-            <Text style={styles.phoneText}>+91 {mobile}</Text>
+            <Text style={s.phoneText}>+91 {mobile}</Text>
           </Text>
 
           {/* OTP Inputs */}
-          <View style={styles.otpContainer}>
+          <View style={s.otpContainer}>
             {Array(OTP_LENGTH)
               .fill(0)
               .map((_, index) => (
@@ -107,9 +110,9 @@ const OTPScreen = ({ route, navigation }) => {
                   key={index}
                   ref={(ref) => (inputRefs.current[index] = ref)}
                   style={[
-                    styles.otpInput,
-                    otp[index] && styles.otpInputFilled,
-                    error && styles.otpInputError,
+                    s.otpInput,
+                    otp[index] && s.otpInputFilled,
+                    error && s.otpInputError,
                   ]}
                   value={otp[index]}
                   onChangeText={(value) =>
@@ -125,21 +128,21 @@ const OTPScreen = ({ route, navigation }) => {
           </View>
 
           {error && (
-            <View style={styles.errorContainer}>
+            <View style={s.errorContainer}>
               <Icon name="alert-circle" size={14} color={colors.danger} />
-              <Text style={styles.errorText}>{error}</Text>
+              <Text style={s.errorText}>{error}</Text>
             </View>
           )}
 
           {/* Resend */}
-          <View style={styles.resendContainer}>
+          <View style={s.resendContainer}>
             {timer > 0 ? (
-              <Text style={styles.timerText}>
-                Resend OTP in <Text style={styles.timerCount}>{timer}s</Text>
+              <Text style={s.timerText}>
+                Resend OTP in <Text style={s.timerCount}>{timer}s</Text>
               </Text>
             ) : (
               <TouchableOpacity onPress={handleResend}>
-                <Text style={styles.resendText}>Resend OTP</Text>
+                <Text style={s.resendText}>Resend OTP</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -150,10 +153,10 @@ const OTPScreen = ({ route, navigation }) => {
             loading={loginPending}
             disabled={!isComplete}
             icon="check-circle-outline"
-            style={styles.verifyButton}
+            style={s.verifyButton}
           />
 
-          <Text style={styles.hint}>
+          <Text style={s.hint}>
             For demo, enter any 4-digit code (e.g. 1234)
           </Text>
         </View>
@@ -162,7 +165,7 @@ const OTPScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

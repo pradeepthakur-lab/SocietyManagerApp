@@ -4,11 +4,15 @@ import Header from '../../components/Header';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import spacing from '../../constants/spacing';
 
 const AddResident = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { addResident, flats } = useSociety();
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
@@ -21,7 +25,7 @@ const AddResident = ({ navigation }) => {
 
   const handleAdd = async () => {
     if (!name.trim() || !mobile.trim()) {
-      Alert.alert('Error', 'Name and mobile are required');
+      showToast('Name and mobile are required', 'error');
       return;
     }
     setLoading(true);
@@ -35,16 +39,15 @@ const AddResident = ({ navigation }) => {
     });
     setLoading(false);
     if (success) {
-      Alert.alert('Success', 'Resident added successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      showToast('Resident added successfully', 'success');
+      navigation.goBack();
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Add Resident" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Input label="Full Name" value={name} onChangeText={setName} placeholder="Resident name" icon="account" />
         <Input label="Mobile" value={mobile} onChangeText={setMobile} placeholder="10-digit number" icon="cellphone" keyboardType="phone-pad" maxLength={10} />
         <Input label="Email (optional)" value={email} onChangeText={setEmail} placeholder="email@example.com" icon="email" keyboardType="email-address" />
@@ -56,7 +59,7 @@ const AddResident = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.lg },
 });

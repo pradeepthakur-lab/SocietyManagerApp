@@ -1,96 +1,52 @@
 import api from './api';
-import mockData from './mockData';
 
 export const societyService = {
   getSociety: async () => {
-    return api.mockResponse(mockData.society);
+    return api.get('/society');
   },
 
   updateSociety: async (updates) => {
-    Object.assign(mockData.society, updates);
-    return api.mockResponse(mockData.society);
+    return api.put('/society', updates);
+  },
+
+  updateInterestRate: async (arrearsInterestRate) => {
+    return api.put('/society/interest-rate', { arrearsInterestRate });
   },
 
   getBuildings: async () => {
-    return api.mockResponse(mockData.buildings);
+    return api.get('/buildings');
   },
 
   addBuilding: async (building) => {
-    const newBuilding = {
-      id: 'b' + (mockData.buildings.length + 1),
-      societyId: 's1',
-      ...building,
-    };
-    mockData.buildings.push(newBuilding);
-    return api.mockResponse(newBuilding);
+    return api.post('/buildings', building);
   },
 
   getFlats: async () => {
-    return api.mockResponse(mockData.flats);
+    return api.get('/flats');
   },
 
   addFlat: async (flat) => {
-    const newFlat = {
-      id: 'f' + (mockData.flats.length + 1),
-      societyId: 's1',
-      residentId: null,
-      status: 'vacant',
-      ...flat,
-    };
-    mockData.flats.push(newFlat);
-    return api.mockResponse(newFlat);
+    return api.post('/flats', flat);
   },
 
   updateFlat: async (flatId, updates) => {
-    const flat = mockData.flats.find((f) => f.id === flatId);
-    if (flat) {
-      Object.assign(flat, updates);
-    }
-    return api.mockResponse(flat);
+    return api.put(`/flats/${flatId}`, updates);
   },
 
   deleteFlat: async (flatId) => {
-    const index = mockData.flats.findIndex((f) => f.id === flatId);
-    if (index > -1) {
-      mockData.flats.splice(index, 1);
-    }
-    return api.mockResponse(null);
+    return api.del(`/flats/${flatId}`);
   },
 
   getResidents: async () => {
-    const residents = mockData.users.filter(
-      (u) => u.role === 'resident' || u.role === 'tenant',
-    );
-    return api.mockResponse(residents);
+    return api.get('/residents');
   },
 
   addResident: async (resident) => {
-    const newResident = {
-      id: 'u' + (mockData.users.length + 1),
-      societyId: 's1',
-      avatar: null,
-      ...resident,
-    };
-    mockData.users.push(newResident);
-
-    // Update flat status
-    if (resident.flatId) {
-      const flat = mockData.flats.find((f) => f.id === resident.flatId);
-      if (flat) {
-        flat.residentId = newResident.id;
-        flat.status = 'occupied';
-      }
-    }
-
-    return api.mockResponse(newResident);
+    return api.post('/residents', resident);
   },
 
   updateResident: async (residentId, updates) => {
-    const resident = mockData.users.find((u) => u.id === residentId);
-    if (resident) {
-      Object.assign(resident, updates);
-    }
-    return api.mockResponse(resident);
+    return api.put(`/residents/${residentId}`, updates);
   },
 };
 

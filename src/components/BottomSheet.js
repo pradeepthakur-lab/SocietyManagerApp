@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
@@ -22,6 +22,8 @@ const BottomSheet = ({
   height = '50%',
 }) => {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
 
   return (
     <Modal
@@ -31,19 +33,19 @@ const BottomSheet = ({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay} />
+        <View style={s.overlay} />
       </TouchableWithoutFeedback>
-      <View style={[styles.sheet, { maxHeight: height, paddingBottom: insets.bottom + spacing.base }]}>
-        <View style={styles.handle} />
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+      <View style={[s.sheet, { maxHeight: height, paddingBottom: insets.bottom + spacing.base }]}>
+        <View style={s.handle} />
+        <View style={s.header}>
+          <Text style={s.title}>{title}</Text>
+          <TouchableOpacity onPress={onClose} style={s.closeButton}>
             <Icon name="close" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={s.content}
         >
           {children}
         </ScrollView>
@@ -52,7 +54,7 @@ const BottomSheet = ({
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: colors.overlay,

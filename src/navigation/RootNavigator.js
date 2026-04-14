@@ -7,14 +7,15 @@ import AdminTabs from './AdminTabs';
 import ResidentTabs from './ResidentTabs';
 import SecurityTabs from './SecurityTabs';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const RootNavigator = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { colors } = useTheme();
 
   if (isLoading) {
     return (
-      <View style={styles.loading}>
+      <View style={makeStyles(colors).loading}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -38,7 +39,7 @@ const RootNavigator = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   loading: {
     flex: 1,
     justifyContent: 'center',

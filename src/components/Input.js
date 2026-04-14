@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
@@ -25,6 +25,8 @@ const Input = ({
   autoCapitalize = 'none',
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
 
   const getBorderColor = () => {
     if (error) return colors.danger;
@@ -33,11 +35,11 @@ const Input = ({
   };
 
   return (
-    <View style={[styles.container, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View style={[s.container, style]}>
+      {label && <Text style={s.label}>{label}</Text>}
       <View
         style={[
-          styles.inputContainer,
+          s.inputContainer,
           {
             borderColor: getBorderColor(),
             backgroundColor: editable ? colors.surface : colors.surfaceLight,
@@ -50,7 +52,7 @@ const Input = ({
             name={icon}
             size={20}
             color={isFocused ? colors.primary : colors.textMuted}
-            style={styles.leftIcon}
+            style={s.leftIcon}
           />
         )}
         <TextInput
@@ -68,7 +70,7 @@ const Input = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           style={[
-            styles.input,
+            s.input,
             typography.body2,
             { color: colors.textPrimary },
             multiline && { textAlignVertical: 'top', paddingTop: 14 },
@@ -76,7 +78,7 @@ const Input = ({
           ]}
         />
         {rightIcon && (
-          <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>
+          <TouchableOpacity onPress={onRightIconPress} style={s.rightIcon}>
             <Icon
               name={rightIcon}
               size={20}
@@ -86,16 +88,16 @@ const Input = ({
         )}
       </View>
       {error && (
-        <View style={styles.errorContainer}>
+        <View style={s.errorContainer}>
           <Icon name="alert-circle-outline" size={14} color={colors.danger} />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={s.errorText}>{error}</Text>
         </View>
       )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     marginBottom: spacing.base,
   },

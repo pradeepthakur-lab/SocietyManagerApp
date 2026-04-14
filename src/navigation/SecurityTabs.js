@@ -4,13 +4,14 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SecurityStack from './SecurityStack';
 import VehicleManagement from '../screens/shared/VehicleManagement';
 import Profile from '../screens/resident/Profile';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
 const Tab = createBottomTabNavigator();
 
 const SecurityTabs = () => {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{

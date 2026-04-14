@@ -5,13 +5,14 @@ import ResidentStack from './ResidentStack';
 import PaymentHistory from '../screens/resident/PaymentHistory';
 import NoticesScreen from '../screens/resident/NoticesScreen';
 import Profile from '../screens/resident/Profile';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
 const Tab = createBottomTabNavigator();
 
 const ResidentTabs = () => {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{

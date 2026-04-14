@@ -1,76 +1,37 @@
 import api from './api';
-import mockData from './mockData';
 
 export const vehicleService = {
   getVehicles: async (filters = {}) => {
-    let vehicles = [...mockData.vehicles];
-
-    if (filters.flatId) {
-      vehicles = vehicles.filter((v) => v.flatId === filters.flatId);
-    }
-    if (filters.residentId) {
-      vehicles = vehicles.filter((v) => v.residentId === filters.residentId);
-    }
-    if (filters.type) {
-      vehicles = vehicles.filter((v) => v.type === filters.type);
-    }
-
-    return api.mockResponse(vehicles);
+    const params = new URLSearchParams();
+    if (filters.flatId) params.append('flatId', filters.flatId);
+    if (filters.residentId) params.append('residentId', filters.residentId);
+    if (filters.type) params.append('type', filters.type);
+    const qs = params.toString();
+    return api.get(`/vehicles${qs ? '?' + qs : ''}`);
   },
 
   getVehicleById: async (vehicleId) => {
-    const vehicle = mockData.vehicles.find((v) => v.id === vehicleId);
-    return api.mockResponse(vehicle);
+    return api.get(`/vehicles/${vehicleId}`);
   },
 
   addVehicle: async (vehicle) => {
-    const newVehicle = {
-      id: 'v' + (mockData.vehicles.length + 1),
-      ...vehicle,
-    };
-    mockData.vehicles.push(newVehicle);
-    return api.mockResponse(newVehicle);
+    return api.post('/vehicles', vehicle);
   },
 
   updateVehicle: async (vehicleId, updates) => {
-    const vehicle = mockData.vehicles.find((v) => v.id === vehicleId);
-    if (vehicle) {
-      Object.assign(vehicle, updates);
-    }
-    return api.mockResponse(vehicle);
+    return api.put(`/vehicles/${vehicleId}`, updates);
   },
 
   removeVehicle: async (vehicleId) => {
-    const index = mockData.vehicles.findIndex((v) => v.id === vehicleId);
-    if (index > -1) {
-      mockData.vehicles.splice(index, 1);
-    }
-    return api.mockResponse(null);
+    return api.del(`/vehicles/${vehicleId}`);
   },
 
   getVehiclesByFlat: async (flatId) => {
-    const vehicles = mockData.vehicles.filter((v) => v.flatId === flatId);
-    return api.mockResponse(vehicles);
+    return api.get(`/vehicles?flatId=${flatId}`);
   },
 
   getVehicleStats: async () => {
-    const total = mockData.vehicles.length;
-    const twoWheelers = mockData.vehicles.filter(
-      (v) => v.type === 'two_wheeler',
-    ).length;
-    const fourWheelers = mockData.vehicles.filter(
-      (v) => v.type === 'four_wheeler',
-    ).length;
-    const totalMonthlyCharges = mockData.vehicles.reduce(
-      (sum, v) => sum + v.monthlyCharge,
-      0,
-    );
-    return api.mockResponse({
-      total,
-      twoWheelers,
-      fourWheelers,
-      totalMonthlyCharges,
-    });
+    return api.get('/vehicles/stats');
   },
 };
 

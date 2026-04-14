@@ -11,12 +11,14 @@ import EmptyState from '../../components/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { COMPLAINT_CATEGORIES } from '../../constants/roles';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatDate } from '../../utils/formatDate';
 
 const Complaints = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
   const { complaints, loadComplaints, addComplaint } = useNotifications();
   const [showAdd, setShowAdd] = useState(false);
@@ -43,28 +45,28 @@ const Complaints = ({ navigation }) => {
   };
 
   const renderComplaint = ({ item }) => (
-    <Card style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.catBadge}>
+    <Card style={s.card}>
+      <View style={s.header}>
+        <View style={s.catBadge}>
           <Icon name="wrench" size={14} color={colors.accent} />
-          <Text style={styles.catText}>{item.category}</Text>
+          <Text style={s.catText}>{item.category}</Text>
         </View>
         <StatusChip status={item.status} />
       </View>
-      <Text style={styles.compTitle}>{item.title}</Text>
-      <Text style={styles.desc}>{item.description}</Text>
-      <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
+      <Text style={s.compTitle}>{item.title}</Text>
+      <Text style={s.desc}>{item.description}</Text>
+      <Text style={s.date}>{formatDate(item.createdAt)}</Text>
       {item.adminResponse && (
-        <View style={styles.response}>
+        <View style={s.response}>
           <Icon name="reply" size={14} color={colors.info} />
-          <Text style={styles.responseText}>{item.adminResponse}</Text>
+          <Text style={s.responseText}>{item.adminResponse}</Text>
         </View>
       )}
     </Card>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Complaints"
         onBack={() => navigation.goBack()}
@@ -75,22 +77,22 @@ const Complaints = ({ navigation }) => {
         data={complaints}
         keyExtractor={(item) => item.id}
         renderItem={renderComplaint}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<EmptyState icon="check-circle" title="No complaints" message="Raise any issues here" />}
       />
       <BottomSheet visible={showAdd} onClose={() => setShowAdd(false)} title="New Complaint" height="70%">
         <Input label="Title" value={title} onChangeText={setTitle} placeholder="Brief subject" icon="text" />
         <Input label="Description" value={description} onChangeText={setDescription} placeholder="Describe the issue in detail" icon="text-box" multiline numberOfLines={4} />
-        <Text style={styles.catLabel}>Category</Text>
-        <View style={styles.catGrid}>
+        <Text style={s.catLabel}>Category</Text>
+        <View style={s.catGrid}>
           {COMPLAINT_CATEGORIES.map((cat) => (
             <TouchableOpacity
               key={cat}
-              style={[styles.catChip, category === cat && styles.catChipActive]}
+              style={[s.catChip, category === cat && s.catChipActive]}
               onPress={() => setCategory(cat)}
             >
-              <Text style={[styles.catChipText, category === cat && styles.catChipTextActive]}>{cat}</Text>
+              <Text style={[s.catChipText, category === cat && s.catChipTextActive]}>{cat}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -100,7 +102,7 @@ const Complaints = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.md, paddingBottom: spacing.huge },
   card: { marginBottom: spacing.md },

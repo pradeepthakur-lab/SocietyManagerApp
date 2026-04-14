@@ -7,12 +7,16 @@ import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import visitorService from '../../services/visitorService';
 import { VISITOR_PURPOSES } from '../../constants/roles';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 
 const AddVisitor = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [visitorName, setVisitorName] = useState('');
   const [phone, setPhone] = useState('');
   const [purpose, setPurpose] = useState('Guest');
@@ -24,11 +28,11 @@ const AddVisitor = ({ navigation }) => {
 
   const handleAdd = async () => {
     if (!visitorName.trim()) {
-      Alert.alert('Error', 'Visitor name is required');
+      showToast('Visitor name is required', 'error');
       return;
     }
     if (!visitingFlat.trim()) {
-      Alert.alert('Error', 'Visiting flat number is required');
+      showToast('Visiting flat number is required', 'error');
       return;
     }
 
@@ -46,16 +50,17 @@ const AddVisitor = ({ navigation }) => {
     setLoading(false);
 
     if (result.success) {
-      Alert.alert('Visitor Checked In ✅', `${visitorName} has been checked in for flat ${visitingFlat}`, [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      showToast(`${visitorName} checked in for flat ${visitingFlat}`, 'success');
+      navigation.goBack();
+    } else {
+      showToast(result.error || 'Failed to check in visitor', 'error');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Add Visitor" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Input
           label="Visitor Name"
           value={visitorName}
@@ -74,15 +79,15 @@ const AddVisitor = ({ navigation }) => {
         />
 
         {/* Purpose Selection */}
-        <Text style={styles.label}>Purpose of Visit</Text>
-        <View style={styles.purposeGrid}>
+        <Text style={s.label}>Purpose of Visit</Text>
+        <View style={s.purposeGrid}>
           {VISITOR_PURPOSES.map((p) => (
             <TouchableOpacity
               key={p}
-              style={[styles.purposeChip, purpose === p && styles.purposeChipActive]}
+              style={[s.purposeChip, purpose === p && s.purposeChipActive]}
               onPress={() => setPurpose(p)}
             >
-              <Text style={[styles.purposeText, purpose === p && styles.purposeTextActive]}>
+              <Text style={[s.purposeText, purpose === p && s.purposeTextActive]}>
                 {p}
               </Text>
             </TouchableOpacity>
@@ -136,7 +141,7 @@ const AddVisitor = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.lg },
   label: {

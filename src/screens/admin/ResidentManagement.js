@@ -6,11 +6,13 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import Button from '../../components/Button';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 
 const ResidentManagement = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { residents, loadResidents, flats } = useSociety();
 
   useEffect(() => {
@@ -23,20 +25,20 @@ const ResidentManagement = ({ navigation }) => {
   };
 
   const renderResident = ({ item }) => (
-    <Card style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
+    <Card style={s.card}>
+      <View style={s.row}>
+        <View style={s.avatar}>
+          <Text style={s.avatarText}>
             {item.name.charAt(0).toUpperCase()}
           </Text>
         </View>
-        <View style={styles.info}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.meta}>
+        <View style={s.info}>
+          <Text style={s.name}>{item.name}</Text>
+          <Text style={s.meta}>
             {getFlatNumber(item.flatId)} • {item.mobile}
           </Text>
-          <View style={styles.roleChip}>
-            <Text style={styles.roleText}>
+          <View style={s.roleChip}>
+            <Text style={s.roleText}>
               {item.role === 'tenant' ? 'Tenant' : 'Owner'}
             </Text>
           </View>
@@ -47,7 +49,7 @@ const ResidentManagement = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Residents"
         subtitle={`${residents.length} members`}
@@ -59,7 +61,7 @@ const ResidentManagement = ({ navigation }) => {
         data={residents}
         keyExtractor={(item) => item.id}
         renderItem={renderResident}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
@@ -81,7 +83,7 @@ const ResidentManagement = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: {
     paddingHorizontal: spacing.screenHorizontal,

@@ -8,7 +8,7 @@ import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import vehicleService from '../../services/vehicleService';
 import { RESIDENT_ROLES } from '../../constants/roles';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -26,6 +26,8 @@ const typeLabels = {
 };
 
 const VehicleManagement = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [stats, setStats] = useState({});
@@ -71,11 +73,11 @@ const VehicleManagement = ({ navigation }) => {
 
   const renderVehicle = ({ item }) => (
     <Card
-      style={styles.card}
+      style={s.card}
       onPress={() => navigation.navigate('VehicleDetail', { vehicle: item })}
     >
-      <View style={styles.row}>
-        <View style={[styles.iconWrap, {
+      <View style={s.row}>
+        <View style={[s.iconWrap, {
           backgroundColor: item.type === 'four_wheeler' ? colors.primaryGlow : colors.successLight,
         }]}>
           <Icon
@@ -84,21 +86,21 @@ const VehicleManagement = ({ navigation }) => {
             color={item.type === 'four_wheeler' ? colors.primary : colors.success}
           />
         </View>
-        <View style={styles.info}>
-          <Text style={styles.vehicleNumber}>{item.vehicleNumber}</Text>
-          <Text style={styles.make}>{item.make} • {item.color}</Text>
+        <View style={s.info}>
+          <Text style={s.vehicleNumber}>{item.vehicleNumber}</Text>
+          <Text style={s.make}>{item.make} • {item.color}</Text>
           {!isResident && (
-            <Text style={styles.flat}>
+            <Text style={s.flat}>
               {item.flatNumber} — {item.residentName}
             </Text>
           )}
         </View>
-        <View style={styles.right}>
-          <View style={styles.parkingChip}>
+        <View style={s.right}>
+          <View style={s.parkingChip}>
             <Icon name="parking" size={12} color={colors.accent} />
-            <Text style={styles.parkingText}>{item.parkingSlot}</Text>
+            <Text style={s.parkingText}>{item.parkingSlot}</Text>
           </View>
-          <Text style={styles.charge}>
+          <Text style={s.charge}>
             {formatCurrency(item.monthlyCharge)}/mo
           </Text>
         </View>
@@ -107,7 +109,7 @@ const VehicleManagement = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title={isResident ? 'My Vehicles' : 'Vehicle Management'}
         subtitle={isResident ? undefined : `${stats.total || 0} vehicles registered`}
@@ -118,35 +120,35 @@ const VehicleManagement = ({ navigation }) => {
 
       {/* Stats Row (Admin/Manager only) */}
       {!isResident && (
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
+        <View style={s.statsRow}>
+          <View style={s.statCard}>
             <Icon name="car" size={20} color={colors.primary} />
-            <Text style={styles.statValue}>{stats.fourWheelers || 0}</Text>
-            <Text style={styles.statLabel}>4-Wheeler</Text>
+            <Text style={s.statValue}>{stats.fourWheelers || 0}</Text>
+            <Text style={s.statLabel}>4-Wheeler</Text>
           </View>
-          <View style={styles.statCard}>
+          <View style={s.statCard}>
             <Icon name="motorbike" size={20} color={colors.success} />
-            <Text style={styles.statValue}>{stats.twoWheelers || 0}</Text>
-            <Text style={styles.statLabel}>2-Wheeler</Text>
+            <Text style={s.statValue}>{stats.twoWheelers || 0}</Text>
+            <Text style={s.statLabel}>2-Wheeler</Text>
           </View>
-          <View style={styles.statCard}>
+          <View style={s.statCard}>
             <Icon name="currency-inr" size={20} color={colors.accent} />
-            <Text style={styles.statValue}>{formatCurrency(stats.totalMonthlyCharges || 0)}</Text>
-            <Text style={styles.statLabel}>Monthly</Text>
+            <Text style={s.statValue}>{formatCurrency(stats.totalMonthlyCharges || 0)}</Text>
+            <Text style={s.statLabel}>Monthly</Text>
           </View>
         </View>
       )}
 
       {/* Filter Tabs */}
       {!isResident && (
-        <View style={styles.filterRow}>
+        <View style={s.filterRow}>
           {filterTabs.map((f) => (
             <TouchableOpacity
               key={f.key}
-              style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+              style={[s.filterChip, filter === f.key && s.filterChipActive]}
               onPress={() => setFilter(f.key)}
             >
-              <Text style={[styles.filterText, filter === f.key && styles.filterTextActive]}>
+              <Text style={[s.filterText, filter === f.key && s.filterTextActive]}>
                 {f.label}
               </Text>
             </TouchableOpacity>
@@ -158,7 +160,7 @@ const VehicleManagement = ({ navigation }) => {
         data={vehicles}
         keyExtractor={(item) => item.id}
         renderItem={renderVehicle}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
@@ -180,7 +182,7 @@ const VehicleManagement = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   statsRow: {
     flexDirection: 'row',

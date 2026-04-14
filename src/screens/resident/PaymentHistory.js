@@ -7,13 +7,15 @@ import StatusChip from '../../components/StatusChip';
 import EmptyState from '../../components/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 
 const PaymentHistory = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
   const { payments, loadPayments } = useBilling();
 
@@ -25,31 +27,31 @@ const PaymentHistory = ({ navigation }) => {
   };
 
   const renderPayment = ({ item }) => (
-    <Card style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.timeline}>
-          <View style={[styles.dot, {
+    <Card style={s.card}>
+      <View style={s.row}>
+        <View style={s.timeline}>
+          <View style={[s.dot, {
             backgroundColor: item.status === 'approved' ? colors.success
               : item.status === 'rejected' ? colors.danger : colors.warning,
           }]} />
-          <View style={styles.line} />
+          <View style={s.line} />
         </View>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.info}>
-              <Text style={styles.amount}>{formatCurrency(item.amount)}</Text>
-              <Text style={styles.method}>
+        <View style={s.content}>
+          <View style={s.header}>
+            <View style={s.info}>
+              <Text style={s.amount}>{formatCurrency(item.amount)}</Text>
+              <Text style={s.method}>
                 <Icon name={getMethodIcon(item.paymentMethod)} size={12} color={colors.textMuted} />
                 {'  '}{item.paymentMethod.replace('_', ' ').toUpperCase()}
               </Text>
-              <Text style={styles.date}>{formatDate(item.submittedAt)}</Text>
+              <Text style={s.date}>{formatDate(item.submittedAt)}</Text>
             </View>
             <StatusChip status={item.status} />
           </View>
           {item.comment && (
-            <View style={styles.commentBox}>
+            <View style={s.commentBox}>
               <Icon name="comment-text-outline" size={14} color={colors.textMuted} />
-              <Text style={styles.comment}>{item.comment}</Text>
+              <Text style={s.comment}>{item.comment}</Text>
             </View>
           )}
         </View>
@@ -58,13 +60,13 @@ const PaymentHistory = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Payment History" onBack={() => navigation.goBack()} />
       <FlatList
         data={payments}
         keyExtractor={(item) => item.id}
         renderItem={renderPayment}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState icon="history" title="No payments yet" message="Your payment history will appear here" />
@@ -74,7 +76,7 @@ const PaymentHistory = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.md, paddingBottom: spacing.huge },
   card: { marginBottom: spacing.sm },

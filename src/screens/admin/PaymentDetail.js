@@ -8,24 +8,28 @@ import Button from '../../components/Button';
 import StatusChip from '../../components/StatusChip';
 import { useAuth } from '../../context/AuthContext';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDateTime } from '../../utils/formatDate';
 
-const DetailRow = ({ label, value, icon }) => (
-  <View style={styles.detailRow}>
-    {icon && <Icon name={icon} size={18} color={colors.textMuted} style={styles.detailIcon} />}
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value}</Text>
-  </View>
-);
-
 const PaymentDetail = ({ route, navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+
+  const DetailRow = ({ label, value, icon }) => (
+    <View style={s.detailRow}>
+      {icon && <Icon name={icon} size={18} color={colors.textMuted} style={s.detailIcon} />}
+      <Text style={s.detailLabel}>{label}</Text>
+      <Text style={s.detailValue}>{value}</Text>
+    </View>
+  );
   const { payment } = route.params;
   const { user } = useAuth();
   const { approvePayment, rejectPayment } = useBilling();
+  const { showToast } = useToast();
   const [comment, setComment] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
 
@@ -40,9 +44,8 @@ const PaymentDetail = ({ route, navigation }) => {
           setActionLoading('approve');
           await approvePayment(payment.id, user.id, comment || 'Verified');
           setActionLoading(null);
-          Alert.alert('Done', 'Payment approved', [
-            { text: 'OK', onPress: () => navigation.goBack() },
-          ]);
+          showToast('Payment approved', 'success');
+          navigation.goBack();
         },
       },
     ]);
@@ -50,7 +53,7 @@ const PaymentDetail = ({ route, navigation }) => {
 
   const handleReject = () => {
     if (!comment.trim()) {
-      Alert.alert('Required', 'Please add a comment explaining the rejection reason');
+      showToast('Please add a rejection reason', 'error');
       return;
     }
     Alert.alert('Reject Payment', 'Are you sure you want to reject this payment?', [
@@ -62,35 +65,34 @@ const PaymentDetail = ({ route, navigation }) => {
           setActionLoading('reject');
           await rejectPayment(payment.id, user.id, comment);
           setActionLoading(null);
-          Alert.alert('Done', 'Payment rejected', [
-            { text: 'OK', onPress: () => navigation.goBack() },
-          ]);
+          showToast('Payment rejected', 'info');
+          navigation.goBack();
         },
       },
     ]);
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Payment Details" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Header Card */}
-        <Card variant="elevated" style={styles.headerCard}>
-          <View style={styles.headerContent}>
-            <View style={styles.amountSection}>
-              <Text style={styles.amountLabel}>Amount</Text>
-              <Text style={styles.amount}>{formatCurrency(payment.amount)}</Text>
+        <Card variant="elevated" style={s.headerCard}>
+          <View style={s.headerContent}>
+            <View style={s.amountSection}>
+              <Text style={s.amountLabel}>Amount</Text>
+              <Text style={s.amount}>{formatCurrency(payment.amount)}</Text>
             </View>
             <StatusChip status={payment.status} />
           </View>
-          <View style={styles.divider} />
-          <Text style={styles.residentName}>{payment.userName}</Text>
-          <Text style={styles.flatInfo}>Flat {payment.flatNumber}</Text>
+          <View style={s.divider} />
+          <Text style={s.residentName}>{payment.userName}</Text>
+          <Text style={s.flatInfo}>Flat {payment.flatNumber}</Text>
         </Card>
 
         {/* Payment Details */}
-        <Text style={styles.sectionTitle}>Payment Information</Text>
-        <Card style={styles.detailsCard}>
+        <Text style={s.sectionTitle}>Payment Information</Text>
+        <Card style={s.detailsCard}>
           <DetailRow label="Method" value={payment.paymentMethod.replace('_', ' ').toUpperCase()} icon="credit-card-outline" />
           {payment.transactionId && (
             <DetailRow label="Transaction ID" value={payment.transactionId} icon="identifier" />
@@ -113,8 +115,8 @@ const PaymentDetail = ({ route, navigation }) => {
         {/* Verification Info */}
         {payment.verifiedAt && (
           <>
-            <Text style={styles.sectionTitle}>Verification</Text>
-            <Card style={styles.detailsCard}>
+            <Text style={s.sectionTitle}>Verification</Text>
+            <Card style={s.detailsCard}>
               <DetailRow label="Verified At" value={formatDateTime(payment.verifiedAt)} icon="check-circle-outline" />
               {payment.comment && (
                 <DetailRow label="Comment" value={payment.comment} icon="comment-text-outline" />
@@ -126,9 +128,9 @@ const PaymentDetail = ({ route, navigation }) => {
         {/* Screenshot */}
         {payment.screenshot && (
           <>
-            <Text style={styles.sectionTitle}>Screenshot</Text>
+            <Text style={s.sectionTitle}>Screenshot</Text>
             <Card>
-              <Image source={{ uri: payment.screenshot }} style={styles.screenshot} resizeMode="contain" />
+              <Image source={{ uri: payment.screenshot }} style={s.screenshot} resizeMode="contain" />
             </Card>
           </>
         )}
@@ -136,7 +138,7 @@ const PaymentDetail = ({ route, navigation }) => {
         {/* Admin Actions */}
         {isPending && (
           <>
-            <Text style={styles.sectionTitle}>Admin Action</Text>
+            <Text style={s.sectionTitle}>Admin Action</Text>
             <Input
               label="Comment"
               value={comment}
@@ -146,13 +148,13 @@ const PaymentDetail = ({ route, navigation }) => {
               multiline
               numberOfLines={3}
             />
-            <View style={styles.actionRow}>
+            <View style={s.actionRow}>
               <Button
                 title="Approve"
                 onPress={handleApprove}
                 variant="secondary"
                 icon="check-circle"
-                style={styles.actionBtn}
+                style={s.actionBtn}
                 loading={actionLoading === 'approve'}
               />
               <Button
@@ -160,7 +162,7 @@ const PaymentDetail = ({ route, navigation }) => {
                 onPress={handleReject}
                 variant="danger"
                 icon="close-circle"
-                style={styles.actionBtn}
+                style={s.actionBtn}
                 loading={actionLoading === 'reject'}
               />
             </View>
@@ -173,7 +175,7 @@ const PaymentDetail = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   headerCard: { padding: spacing.lg },

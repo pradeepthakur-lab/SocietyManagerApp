@@ -17,13 +17,15 @@ import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useBilling } from '../../context/BillingContext';
 import { useNotifications } from '../../context/NotificationContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { getMonthName } from '../../utils/formatDate';
 
 const ResidentDashboard = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { bills, loadBills, payments, loadPayments, loading } = useBilling();
@@ -53,17 +55,17 @@ const ResidentDashboard = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[s.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={s.header}>
         <View>
-          <Text style={styles.greeting}>{greeting()} 👋</Text>
-          <Text style={styles.userName}>{user?.name || 'Resident'}</Text>
+          <Text style={s.greeting}>{greeting()} 👋</Text>
+          <Text style={s.userName}>{user?.name || 'Resident'}</Text>
         </View>
         <TouchableOpacity
-          style={styles.notificationBtn}
+          style={s.notificationBtn}
           onPress={() => navigation.navigate('NoticesScreen')}
         >
           <Icon name="bell-outline" size={24} color={colors.textPrimary} />
@@ -73,19 +75,19 @@ const ResidentDashboard = ({ navigation }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={s.scrollContent}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={loadData} tintColor={colors.primary} />
         }
       >
         {/* Outstanding Amount Card */}
-        <Card variant="elevated" style={styles.dueCard}>
-          <View style={styles.dueHeader}>
+        <Card variant="elevated" style={s.dueCard}>
+          <View style={s.dueHeader}>
             <View>
-              <Text style={styles.dueLabel}>Total Outstanding</Text>
-              <Text style={styles.dueAmount}>{formatCurrency(totalDue)}</Text>
+              <Text style={s.dueLabel}>Total Outstanding</Text>
+              <Text style={s.dueAmount}>{formatCurrency(totalDue)}</Text>
             </View>
-            <View style={styles.dueIconContainer}>
+            <View style={s.dueIconContainer}>
               <Icon name="cash-clock" size={28} color={colors.warning} />
             </View>
           </View>
@@ -96,32 +98,32 @@ const ResidentDashboard = ({ navigation }) => {
               size="small"
               icon="arrow-right"
               iconRight
-              style={styles.payNowBtn}
+              style={s.payNowBtn}
             />
           )}
         </Card>
 
         {/* Quick Status */}
-        <View style={styles.statusRow}>
-          <Card style={styles.statusCard}>
-            <Text style={styles.statusNumber}>{unpaidBills.length}</Text>
-            <Text style={styles.statusLabel}>Unpaid</Text>
+        <View style={s.statusRow}>
+          <Card style={s.statusCard}>
+            <Text style={s.statusNumber}>{unpaidBills.length}</Text>
+            <Text style={s.statusLabel}>Unpaid</Text>
           </Card>
-          <Card style={styles.statusCard}>
-            <Text style={[styles.statusNumber, { color: colors.warning }]}>{pendingBills.length}</Text>
-            <Text style={styles.statusLabel}>Pending</Text>
+          <Card style={s.statusCard}>
+            <Text style={[s.statusNumber, { color: colors.warning }]}>{pendingBills.length}</Text>
+            <Text style={s.statusLabel}>Pending</Text>
           </Card>
-          <Card style={styles.statusCard}>
-            <Text style={[styles.statusNumber, { color: colors.success }]}>
+          <Card style={s.statusCard}>
+            <Text style={[s.statusNumber, { color: colors.success }]}>
               {bills.filter((b) => b.status === 'paid').length}
             </Text>
-            <Text style={styles.statusLabel}>Paid</Text>
+            <Text style={s.statusLabel}>Paid</Text>
           </Card>
         </View>
 
         {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
+        <Text style={s.sectionTitle}>Quick Actions</Text>
+        <View style={s.actionsRow}>
           {[
             { icon: 'file-document', label: 'My Bills', nav: 'BillsList', color: colors.primary },
             { icon: 'history', label: 'Payments', nav: 'PaymentHistory', color: colors.success },
@@ -130,32 +132,32 @@ const ResidentDashboard = ({ navigation }) => {
           ].map((action) => (
             <TouchableOpacity
               key={action.label}
-              style={styles.actionItem}
+              style={s.actionItem}
               onPress={() => navigation.navigate(action.nav)}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIcon, { backgroundColor: action.color + '15' }]}>
+              <View style={[s.actionIcon, { backgroundColor: action.color + '15' }]}>
                 <Icon name={action.icon} size={24} color={action.color} />
               </View>
-              <Text style={styles.actionLabel}>{action.label}</Text>
+              <Text style={s.actionLabel}>{action.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
-        <View style={styles.actionsRow}>
+        <View style={s.actionsRow}>
           {[
             { icon: 'car', label: 'My Vehicles', nav: 'VehicleManagement', color: colors.info },
             { icon: 'bank', label: 'Banking', nav: 'MyBankingDetails', color: colors.warning },
           ].map((action) => (
             <TouchableOpacity
               key={action.label}
-              style={styles.actionItem}
+              style={s.actionItem}
               onPress={() => navigation.navigate(action.nav)}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIcon, { backgroundColor: action.color + '15' }]}>
+              <View style={[s.actionIcon, { backgroundColor: action.color + '15' }]}>
                 <Icon name={action.icon} size={24} color={action.color} />
               </View>
-              <Text style={styles.actionLabel}>{action.label}</Text>
+              <Text style={s.actionLabel}>{action.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -163,27 +165,27 @@ const ResidentDashboard = ({ navigation }) => {
         {/* Recent Bills */}
         {bills.length > 0 && (
           <>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Bills</Text>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Recent Bills</Text>
               <TouchableOpacity onPress={() => navigation.navigate('BillsList')}>
-                <Text style={styles.seeAll}>See All</Text>
+                <Text style={s.seeAll}>See All</Text>
               </TouchableOpacity>
             </View>
             {bills.slice(0, 3).map((bill) => (
               <Card
                 key={bill.id}
-                style={styles.billCard}
+                style={s.billCard}
                 onPress={() => navigation.navigate('BillDetail', { bill })}
               >
-                <View style={styles.billRow}>
+                <View style={s.billRow}>
                   <View>
-                    <Text style={styles.billMonth}>
+                    <Text style={s.billMonth}>
                       {getMonthName(bill.month)} {bill.year}
                     </Text>
-                    <Text style={styles.billFlat}>{bill.flatNumber}</Text>
+                    <Text style={s.billFlat}>{bill.flatNumber}</Text>
                   </View>
-                  <View style={styles.billRight}>
-                    <Text style={styles.billAmount}>{formatCurrency(bill.totalAmount)}</Text>
+                  <View style={s.billRight}>
+                    <Text style={s.billAmount}>{formatCurrency(bill.totalAmount)}</Text>
                     <StatusChip status={bill.status} />
                   </View>
                 </View>
@@ -198,7 +200,7 @@ const ResidentDashboard = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

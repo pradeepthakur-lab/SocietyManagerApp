@@ -17,32 +17,34 @@ import { useAuth } from '../../context/AuthContext';
 import { useBilling } from '../../context/BillingContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { getRelativeTime } from '../../utils/formatDate';
 
-const StatCard = ({ icon, label, value, color, onPress }) => (
-  <Card style={styles.statCard} onPress={onPress}>
-    <View style={[styles.statIcon, { backgroundColor: color + '20' }]}>
-      <Icon name={icon} size={22} color={color} />
-    </View>
-    <Text style={styles.statValue}>{value}</Text>
-    <Text style={styles.statLabel}>{label}</Text>
-  </Card>
-);
-
-const QuickAction = ({ icon, label, onPress, color = colors.primary }) => (
-  <TouchableOpacity style={styles.quickAction} onPress={onPress} activeOpacity={0.7}>
-    <View style={[styles.quickActionIcon, { backgroundColor: color + '15' }]}>
-      <Icon name={icon} size={24} color={color} />
-    </View>
-    <Text style={styles.quickActionLabel}>{label}</Text>
-  </TouchableOpacity>
-);
-
 const AdminDashboard = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+
+  const StatCard = ({ icon, label, value, color, onPress }) => (
+    <Card style={s.statCard} onPress={onPress}>
+      <View style={[s.statIcon, { backgroundColor: color + '20' }]}>
+        <Icon name={icon} size={22} color={color} />
+      </View>
+      <Text style={s.statValue}>{value}</Text>
+      <Text style={s.statLabel}>{label}</Text>
+    </Card>
+  );
+
+  const QuickAction = ({ icon, label, onPress, color = colors.primary }) => (
+    <TouchableOpacity style={s.quickAction} onPress={onPress} activeOpacity={0.7}>
+      <View style={[s.quickActionIcon, { backgroundColor: color + '15' }]}>
+        <Icon name={icon} size={24} color={color} />
+      </View>
+      <Text style={s.quickActionLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { loadReportData, reportData, loadBills, bills, loadPayments, payments, loading } = useBilling();
@@ -74,17 +76,17 @@ const AdminDashboard = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[s.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
       {/* Custom Header */}
-      <View style={styles.header}>
+      <View style={s.header}>
         <View>
-          <Text style={styles.greeting}>{greeting()} 👋</Text>
-          <Text style={styles.userName}>{user?.name || 'Admin'}</Text>
+          <Text style={s.greeting}>{greeting()} 👋</Text>
+          <Text style={s.userName}>{user?.name || 'Admin'}</Text>
         </View>
         <TouchableOpacity
-          style={styles.notificationBtn}
+          style={s.notificationBtn}
           onPress={() => navigation.navigate('Notices')}
         >
           <Icon name="bell-outline" size={24} color={colors.textPrimary} />
@@ -94,7 +96,7 @@ const AdminDashboard = ({ navigation }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={s.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={loading}
@@ -105,7 +107,7 @@ const AdminDashboard = ({ navigation }) => {
         }
       >
         {/* Stats Grid */}
-        <View style={styles.statsGrid}>
+        <View style={s.statsGrid}>
           <StatCard
             icon="cash-check"
             label="Collected"
@@ -133,8 +135,8 @@ const AdminDashboard = ({ navigation }) => {
         </View>
 
         {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.quickActionsRow}>
+        <Text style={s.sectionTitle}>Quick Actions</Text>
+        <View style={s.quickActionsRow}>
           <QuickAction
             icon="file-document-edit"
             label="Generate Bills"
@@ -160,17 +162,17 @@ const AdminDashboard = ({ navigation }) => {
             color={colors.info}
           />
         </View>
-        <View style={styles.quickActionsRow}>
+        <View style={s.quickActionsRow}>
+          <QuickAction
+            icon="file-pdf-box"
+            label="Bill Invoice"
+            onPress={() => navigation.navigate('BillInvoice')}
+            color={colors.warning}
+          />
           <QuickAction
             icon="account-plus"
             label="Add Resident"
             onPress={() => navigation.navigate('AddResident')}
-            color={colors.warning}
-          />
-          <QuickAction
-            icon="home-plus"
-            label="Add Flat"
-            onPress={() => navigation.navigate('AddFlat')}
             color={colors.secondary}
           />
           <QuickAction
@@ -190,27 +192,27 @@ const AdminDashboard = ({ navigation }) => {
         {/* Pending Payments */}
         {pendingPayments.length > 0 && (
           <>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Pending Verifications</Text>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Pending Verifications</Text>
               <TouchableOpacity onPress={() => navigation.navigate('PaymentVerification')}>
-                <Text style={styles.seeAll}>See All</Text>
+                <Text style={s.seeAll}>See All</Text>
               </TouchableOpacity>
             </View>
             {pendingPayments.slice(0, 3).map((payment) => (
               <Card
                 key={payment.id}
-                style={styles.paymentCard}
+                style={s.paymentCard}
                 onPress={() => navigation.navigate('PaymentDetail', { payment })}
               >
-                <View style={styles.paymentCardContent}>
-                  <View style={styles.paymentInfo}>
-                    <Text style={styles.paymentName}>{payment.userName}</Text>
-                    <Text style={styles.paymentFlat}>
+                <View style={s.paymentCardContent}>
+                  <View style={s.paymentInfo}>
+                    <Text style={s.paymentName}>{payment.userName}</Text>
+                    <Text style={s.paymentFlat}>
                       {payment.flatNumber} • {payment.paymentMethod.toUpperCase()}
                     </Text>
                   </View>
-                  <View style={styles.paymentRight}>
-                    <Text style={styles.paymentAmount}>
+                  <View style={s.paymentRight}>
+                    <Text style={s.paymentAmount}>
                       {formatCurrency(payment.amount)}
                     </Text>
                     <StatusChip status={payment.status} />
@@ -224,22 +226,22 @@ const AdminDashboard = ({ navigation }) => {
         {/* Defaulters */}
         {reportData?.defaulters?.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { marginTop: spacing.xl }]}>
+            <Text style={[s.sectionTitle, { marginTop: spacing.xl }]}>
               Defaulters
             </Text>
             {reportData.defaulters.slice(0, 3).map((d, idx) => (
-              <Card key={idx} style={styles.defaulterCard}>
-                <View style={styles.defaulterContent}>
-                  <View style={styles.defaulterAvatar}>
+              <Card key={idx} style={s.defaulterCard}>
+                <View style={s.defaulterContent}>
+                  <View style={s.defaulterAvatar}>
                     <Icon name="account" size={20} color={colors.danger} />
                   </View>
-                  <View style={styles.defaulterInfo}>
-                    <Text style={styles.defaulterName}>{d.residentName}</Text>
-                    <Text style={styles.defaulterFlat}>
+                  <View style={s.defaulterInfo}>
+                    <Text style={s.defaulterName}>{d.residentName}</Text>
+                    <Text style={s.defaulterFlat}>
                       {d.flatNumber} • Due: {d.dueDate}
                     </Text>
                   </View>
-                  <Text style={styles.defaulterAmount}>
+                  <Text style={s.defaulterAmount}>
                     {formatCurrency(d.amount)}
                   </Text>
                 </View>
@@ -254,7 +256,7 @@ const AdminDashboard = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

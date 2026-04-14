@@ -5,81 +5,83 @@ import Header from '../../components/Header';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import StatusChip from '../../components/StatusChip';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { getMonthName, formatDate } from '../../utils/formatDate';
 
 const BillDetail = ({ route, navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { bill } = route.params;
   const canPay = bill.status === 'unpaid';
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Bill Details" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Bill Header */}
-        <Card variant="elevated" style={styles.headerCard}>
-          <View style={styles.headerRow}>
+        <Card variant="elevated" style={s.headerCard}>
+          <View style={s.headerRow}>
             <View>
-              <Text style={styles.period}>{getMonthName(bill.month)} {bill.year}</Text>
-              <Text style={styles.flat}>Flat {bill.flatNumber}</Text>
+              <Text style={s.period}>{getMonthName(bill.month)} {bill.year}</Text>
+              <Text style={s.flat}>Flat {bill.flatNumber}</Text>
             </View>
             <StatusChip status={bill.status} />
           </View>
-          <View style={styles.divider} />
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Total Amount</Text>
-            <Text style={styles.amount}>{formatCurrency(bill.totalAmount + bill.lateFee)}</Text>
+          <View style={s.divider} />
+          <View style={s.amountRow}>
+            <Text style={s.amountLabel}>Total Amount</Text>
+            <Text style={s.amount}>{formatCurrency(bill.totalAmount + bill.lateFee)}</Text>
           </View>
         </Card>
 
         {/* Charges Breakdown */}
-        <Text style={styles.sectionTitle}>Charges Breakdown</Text>
+        <Text style={s.sectionTitle}>Charges Breakdown</Text>
         <Card>
           {bill.charges.map((charge, idx) => (
-            <View key={idx} style={styles.chargeRow}>
-              <Text style={styles.chargeName}>{charge.name}</Text>
-              <Text style={styles.chargeAmount}>{formatCurrency(charge.amount)}</Text>
+            <View key={idx} style={s.chargeRow}>
+              <Text style={s.chargeName}>{charge.name}</Text>
+              <Text style={s.chargeAmount}>{formatCurrency(charge.amount)}</Text>
             </View>
           ))}
           {bill.lateFee > 0 && (
-            <View style={styles.chargeRow}>
-              <Text style={[styles.chargeName, { color: colors.danger }]}>Late Fee</Text>
-              <Text style={[styles.chargeAmount, { color: colors.danger }]}>{formatCurrency(bill.lateFee)}</Text>
+            <View style={s.chargeRow}>
+              <Text style={[s.chargeName, { color: colors.danger }]}>Late Fee</Text>
+              <Text style={[s.chargeAmount, { color: colors.danger }]}>{formatCurrency(bill.lateFee)}</Text>
             </View>
           )}
           {bill.previousDue > 0 && (
-            <View style={styles.chargeRow}>
-              <Text style={styles.chargeName}>Previous Due</Text>
-              <Text style={styles.chargeAmount}>{formatCurrency(bill.previousDue)}</Text>
+            <View style={s.chargeRow}>
+              <Text style={s.chargeName}>Previous Due</Text>
+              <Text style={s.chargeAmount}>{formatCurrency(bill.previousDue)}</Text>
             </View>
           )}
-          <View style={styles.totalDivider} />
-          <View style={styles.chargeRow}>
-            <Text style={styles.totalLabel}>Grand Total</Text>
-            <Text style={styles.totalAmount}>{formatCurrency(bill.totalAmount + bill.lateFee + bill.previousDue)}</Text>
+          <View style={s.totalDivider} />
+          <View style={s.chargeRow}>
+            <Text style={s.totalLabel}>Grand Total</Text>
+            <Text style={s.totalAmount}>{formatCurrency(bill.totalAmount + bill.lateFee + bill.previousDue)}</Text>
           </View>
         </Card>
 
         {/* Bill Info */}
-        <Text style={styles.sectionTitle}>Bill Information</Text>
+        <Text style={s.sectionTitle}>Bill Information</Text>
         <Card>
-          <View style={styles.infoRow}>
+          <View style={s.infoRow}>
             <Icon name="identifier" size={16} color={colors.textMuted} />
-            <Text style={styles.infoLabel}>Bill ID</Text>
-            <Text style={styles.infoValue}>{bill.id}</Text>
+            <Text style={s.infoLabel}>Bill ID</Text>
+            <Text style={s.infoValue}>{bill.id}</Text>
           </View>
-          <View style={styles.infoRow}>
+          <View style={s.infoRow}>
             <Icon name="calendar" size={16} color={colors.textMuted} />
-            <Text style={styles.infoLabel}>Due Date</Text>
-            <Text style={styles.infoValue}>{formatDate(bill.dueDate)}</Text>
+            <Text style={s.infoLabel}>Due Date</Text>
+            <Text style={s.infoValue}>{formatDate(bill.dueDate)}</Text>
           </View>
-          <View style={styles.infoRow}>
+          <View style={s.infoRow}>
             <Icon name="clock" size={16} color={colors.textMuted} />
-            <Text style={styles.infoLabel}>Generated</Text>
-            <Text style={styles.infoValue}>{formatDate(bill.createdAt)}</Text>
+            <Text style={s.infoLabel}>Generated</Text>
+            <Text style={s.infoValue}>{formatDate(bill.createdAt)}</Text>
           </View>
         </Card>
 
@@ -98,7 +100,7 @@ const BillDetail = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   headerCard: { padding: spacing.lg },

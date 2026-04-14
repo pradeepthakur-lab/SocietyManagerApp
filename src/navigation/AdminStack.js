@@ -11,6 +11,7 @@ import BillGeneration from '../screens/admin/BillGeneration';
 import PaymentVerification from '../screens/admin/PaymentVerification';
 import PaymentDetail from '../screens/admin/PaymentDetail';
 import Expenses from '../screens/admin/Expenses';
+import BillInvoice from '../screens/admin/BillInvoice';
 
 // Shared screens
 import VisitorLog from '../screens/shared/VisitorLog';
@@ -40,6 +41,7 @@ const AdminStack = () => {
       <Stack.Screen name="PaymentVerification" component={PaymentVerification} />
       <Stack.Screen name="PaymentDetail" component={PaymentDetail} />
       <Stack.Screen name="Expenses" component={Expenses} />
+      <Stack.Screen name="BillInvoice" component={BillInvoice} />
       {/* Visitor screens */}
       <Stack.Screen name="VisitorLog" component={VisitorLog} />
       <Stack.Screen name="AddVisitor" component={AddVisitor} />

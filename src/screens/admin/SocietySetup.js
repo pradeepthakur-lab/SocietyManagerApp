@@ -6,12 +6,16 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 
 const SocietySetup = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { society, buildings, loadSociety, loadBuildings, updateSociety, addBuilding } = useSociety();
+  const { showToast } = useToast();
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -19,6 +23,7 @@ const SocietySetup = ({ navigation }) => {
   const [accountNumber, setAccountNumber] = useState('');
   const [ifsc, setIfsc] = useState('');
   const [upiId, setUpiId] = useState('');
+  const [arrearsRate, setArrearsRate] = useState('');
   const [newBuildingName, setNewBuildingName] = useState('');
   const [newBuildingFloors, setNewBuildingFloors] = useState('');
 
@@ -35,6 +40,7 @@ const SocietySetup = ({ navigation }) => {
       setAccountNumber(society.bankDetails?.accountNumber || '');
       setIfsc(society.bankDetails?.ifsc || '');
       setUpiId(society.upiId || '');
+      setArrearsRate(society.arrearsInterestRate?.toString() || '0');
     }
   }, [society]);
 
@@ -44,9 +50,10 @@ const SocietySetup = ({ navigation }) => {
       address,
       bankDetails: { bankName, accountNumber, ifsc, accountHolder: name + ' CHS' },
       upiId,
+      arrearsInterestRate: parseFloat(arrearsRate) || 0,
     });
     if (success) {
-      Alert.alert('Success', 'Society details updated successfully');
+      showToast('Society details updated', 'success');
     }
   };
 
@@ -59,20 +66,20 @@ const SocietySetup = ({ navigation }) => {
     if (success) {
       setNewBuildingName('');
       setNewBuildingFloors('');
-      Alert.alert('Success', 'Building added successfully');
+      showToast('Building added successfully', 'success');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Society Setup" onBack={() => navigation.goBack()} />
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
         {/* Society Details */}
-        <Text style={styles.sectionTitle}>Society Information</Text>
-        <Card style={styles.section}>
+        <Text style={s.sectionTitle}>Society Information</Text>
+        <Card style={s.section}>
           <Input
             label="Society Name"
             value={name}
@@ -92,8 +99,8 @@ const SocietySetup = ({ navigation }) => {
         </Card>
 
         {/* Bank Details */}
-        <Text style={styles.sectionTitle}>Bank Details</Text>
-        <Card style={styles.section}>
+        <Text style={s.sectionTitle}>Bank Details</Text>
+        <Card style={s.section}>
           <Input
             label="Bank Name"
             value={bankName}
@@ -126,32 +133,52 @@ const SocietySetup = ({ navigation }) => {
           />
         </Card>
 
+        {/* Arrears & Interest */}
+        <Text style={s.sectionTitle}>Arrears & Interest</Text>
+        <Card style={s.section}>
+          <Input
+            label="Interest Rate on Arrears (%)"
+            value={arrearsRate}
+            onChangeText={setArrearsRate}
+            placeholder="e.g., 21"
+            icon="percent"
+            keyboardType="decimal-pad"
+            maxLength={5}
+          />
+          <View style={s.infoRow}>
+            <Icon name="information-outline" size={16} color={colors.info} />
+            <Text style={s.infoText}>
+              This interest will be auto-applied on pending arrears when generating new bills. Set to 0 for no interest.
+            </Text>
+          </View>
+        </Card>
+
         <Button
           title="Save Society Details"
           onPress={handleSave}
           icon="content-save"
-          style={styles.saveBtn}
+          style={s.saveBtn}
         />
 
         {/* Buildings */}
-        <Text style={styles.sectionTitle}>Buildings / Wings</Text>
+        <Text style={s.sectionTitle}>Buildings / Wings</Text>
         {buildings.map((b) => (
-          <Card key={b.id} style={styles.buildingCard}>
-            <View style={styles.buildingRow}>
-              <View style={styles.buildingIcon}>
+          <Card key={b.id} style={s.buildingCard}>
+            <View style={s.buildingRow}>
+              <View style={s.buildingIcon}>
                 <Icon name="office-building" size={20} color={colors.primary} />
               </View>
               <View>
-                <Text style={styles.buildingName}>{b.name}</Text>
-                <Text style={styles.buildingFloors}>{b.floors} Floors</Text>
+                <Text style={s.buildingName}>{b.name}</Text>
+                <Text style={s.buildingFloors}>{b.floors} Floors</Text>
               </View>
             </View>
           </Card>
         ))}
 
         {/* Add Building */}
-        <Card style={styles.section}>
-          <Text style={styles.addTitle}>Add New Building</Text>
+        <Card style={s.section}>
+          <Text style={s.addTitle}>Add New Building</Text>
           <Input
             label="Building Name"
             value={newBuildingName}
@@ -182,7 +209,7 @@ const SocietySetup = ({ navigation }) => {
 };
 
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -231,6 +258,21 @@ const styles = StyleSheet.create({
     ...typography.subtitle2,
     color: colors.textSecondary,
     marginBottom: spacing.md,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: colors.infoLight,
+    padding: spacing.md,
+    borderRadius: spacing.radiusSmall,
+    marginTop: spacing.xs,
+  },
+  infoText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    flex: 1,
+    marginLeft: spacing.sm,
+    lineHeight: 18,
   },
 });
 

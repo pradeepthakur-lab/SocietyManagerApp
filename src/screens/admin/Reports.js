@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -12,6 +12,8 @@ import { formatCurrency } from '../../utils/formatCurrency';
 const { width } = Dimensions.get('window');
 
 const Reports = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { reportData, loadReportData, loading } = useBilling();
 
   useEffect(() => {
@@ -28,26 +30,26 @@ const Reports = ({ navigation }) => {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Reports" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Summary Cards */}
-        <Text style={styles.sectionTitle}>Overview</Text>
-        <View style={styles.grid}>
+        <Text style={s.sectionTitle}>Overview</Text>
+        <View style={s.grid}>
           {summaryCards.map((card, idx) => (
-            <Card key={idx} style={styles.summaryCard}>
-              <View style={[styles.cardIcon, { backgroundColor: card.color + '20' }]}>
+            <Card key={idx} style={s.summaryCard}>
+              <View style={[s.cardIcon, { backgroundColor: card.color + '20' }]}>
                 <Icon name={card.icon} size={22} color={card.color} />
               </View>
-              <Text style={styles.cardValue}>{card.value}</Text>
-              <Text style={styles.cardLabel}>{card.label}</Text>
+              <Text style={s.cardValue}>{card.value}</Text>
+              <Text style={s.cardLabel}>{card.label}</Text>
             </Card>
           ))}
         </View>
 
         {/* Monthly Bar Chart (simplified without chart lib dependency issues) */}
-        <Text style={styles.sectionTitle}>Monthly Collection</Text>
-        <Card style={styles.chartCard}>
+        <Text style={s.sectionTitle}>Monthly Collection</Text>
+        <Card style={s.chartCard}>
           {(data.monthlyData || []).map((m, i) => {
             const maxVal = Math.max(
               ...((data.monthlyData || []).map((d) => Math.max(d.collection, d.expenses))),
@@ -56,43 +58,43 @@ const Reports = ({ navigation }) => {
             const collectionHeight = (m.collection / maxVal) * 100;
             const expenseHeight = (m.expenses / maxVal) * 100;
             return (
-              <View key={i} style={styles.barGroup}>
-                <View style={styles.barContainer}>
-                  <View style={[styles.bar, styles.barCollection, { height: collectionHeight }]} />
-                  <View style={[styles.bar, styles.barExpense, { height: expenseHeight }]} />
+              <View key={i} style={s.barGroup}>
+                <View style={s.barContainer}>
+                  <View style={[s.bar, s.barCollection, { height: collectionHeight }]} />
+                  <View style={[s.bar, s.barExpense, { height: expenseHeight }]} />
                 </View>
-                <Text style={styles.barLabel}>{m.month}</Text>
+                <Text style={s.barLabel}>{m.month}</Text>
               </View>
             );
           })}
-          <View style={styles.legend}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
-              <Text style={styles.legendText}>Collection</Text>
+          <View style={s.legend}>
+            <View style={s.legendItem}>
+              <View style={[s.legendDot, { backgroundColor: colors.success }]} />
+              <Text style={s.legendText}>Collection</Text>
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: colors.danger }]} />
-              <Text style={styles.legendText}>Expenses</Text>
+            <View style={s.legendItem}>
+              <View style={[s.legendDot, { backgroundColor: colors.danger }]} />
+              <Text style={s.legendText}>Expenses</Text>
             </View>
           </View>
         </Card>
 
         {/* Defaulters */}
-        <Text style={styles.sectionTitle}>Defaulters</Text>
+        <Text style={s.sectionTitle}>Defaulters</Text>
         {(data.defaulters || []).length === 0 ? (
-          <Card><Text style={styles.emptyText}>No defaulters 🎉</Text></Card>
+          <Card><Text style={s.emptyText}>No defaulters 🎉</Text></Card>
         ) : (
           (data.defaulters || []).map((d, idx) => (
-            <Card key={idx} style={styles.defaulterCard}>
-              <View style={styles.defaulterRow}>
-                <View style={styles.defaulterAvatar}>
+            <Card key={idx} style={s.defaulterCard}>
+              <View style={s.defaulterRow}>
+                <View style={s.defaulterAvatar}>
                   <Icon name="account-alert" size={18} color={colors.danger} />
                 </View>
-                <View style={styles.defaulterInfo}>
-                  <Text style={styles.defaulterName}>{d.residentName}</Text>
-                  <Text style={styles.defaulterMeta}>{d.flatNumber} • Due: {d.dueDate}</Text>
+                <View style={s.defaulterInfo}>
+                  <Text style={s.defaulterName}>{d.residentName}</Text>
+                  <Text style={s.defaulterMeta}>{d.flatNumber} • Due: {d.dueDate}</Text>
                 </View>
-                <Text style={styles.defaulterAmt}>{formatCurrency(d.amount)}</Text>
+                <Text style={s.defaulterAmt}>{formatCurrency(d.amount)}</Text>
               </View>
             </Card>
           ))
@@ -104,7 +106,7 @@ const Reports = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal },
   sectionTitle: {

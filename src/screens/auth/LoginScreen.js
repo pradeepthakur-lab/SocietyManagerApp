@@ -14,12 +14,14 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { validatePhone } from '../../utils/validators';
 
 const LoginScreen = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { login, loginPending, error, clearError } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -49,42 +51,44 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[s.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+        style={s.flex}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={s.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          bounces={false}
         >
           {/* Logo / Branding */}
-          <View style={styles.brandSection}>
-            <View style={styles.logoContainer}>
+          <View style={s.brandSection}>
+            <View style={s.logoContainer}>
               <Icon name="city-variant" size={48} color={colors.primary} />
             </View>
-            <Text style={styles.appName}>Society Manager</Text>
-            <Text style={styles.tagline}>Manage your society effortlessly</Text>
+            <Text style={s.appName}>Society Manager</Text>
+            <Text style={s.tagline}>Manage your society effortlessly</Text>
           </View>
 
           {/* Role Selection — 2×2 Grid */}
-          <Text style={styles.sectionTitle}>I am a</Text>
-          <View style={styles.roleGrid}>
+          <Text style={s.sectionTitle}>I am a</Text>
+          <View style={s.roleGrid}>
             {roles.map((role) => (
               <TouchableOpacity
                 key={role.key}
                 style={[
-                  styles.roleCard,
-                  selectedRole === role.key && styles.roleCardActive,
+                  s.roleCard,
+                  selectedRole === role.key && s.roleCardActive,
                 ]}
                 onPress={() => setSelectedRole(role.key)}
                 activeOpacity={0.7}
               >
                 <View style={[
-                  styles.roleIconContainer,
-                  selectedRole === role.key && styles.roleIconActive,
+                  s.roleIconContainer,
+                  selectedRole === role.key && s.roleIconActive,
                 ]}>
                   <Icon
                     name={role.icon}
@@ -93,14 +97,14 @@ const LoginScreen = ({ navigation }) => {
                   />
                 </View>
                 <Text style={[
-                  styles.roleLabel,
-                  selectedRole === role.key && styles.roleLabelActive,
+                  s.roleLabel,
+                  selectedRole === role.key && s.roleLabelActive,
                 ]}>
                   {role.label}
                 </Text>
-                <Text style={styles.roleDesc}>{role.desc}</Text>
+                <Text style={s.roleDesc}>{role.desc}</Text>
                 {selectedRole === role.key && (
-                  <View style={styles.checkMark}>
+                  <View style={s.checkMark}>
                     <Icon name="check-circle" size={18} color={colors.primary} />
                   </View>
                 )}
@@ -109,7 +113,7 @@ const LoginScreen = ({ navigation }) => {
           </View>
 
           {/* Phone Input */}
-          <View style={styles.formSection}>
+          <View style={s.formSection}>
             <Input
               label="Mobile Number"
               value={mobile}
@@ -125,9 +129,9 @@ const LoginScreen = ({ navigation }) => {
             />
 
             {error && (
-              <View style={styles.errorBanner}>
+              <View style={s.errorBanner}>
                 <Icon name="alert-circle" size={16} color={colors.danger} />
-                <Text style={styles.errorText}>{error}</Text>
+                <Text style={s.errorText}>{error}</Text>
               </View>
             )}
 
@@ -136,12 +140,12 @@ const LoginScreen = ({ navigation }) => {
               onPress={handleSendOTP}
               loading={loginPending}
               icon="message-text-outline"
-              style={styles.sendButton}
+              style={s.sendButton}
             />
           </View>
 
           {/* Footer */}
-          <Text style={styles.footer}>
+          <Text style={s.footer}>
             By continuing, you agree to our Terms of Service
           </Text>
         </ScrollView>
@@ -150,7 +154,7 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
-const STATUS_STYLES = {
+const getStatusStyles = (colors) => ({
   paid: { bg: colors.successLight, text: colors.success, label: 'Paid' },
   approved: { bg: colors.successLight, text: colors.success, label: 'Approved' },
   resolved: { bg: colors.successLight, text: colors.success, label: 'Resolved' },
@@ -13,9 +13,12 @@ const STATUS_STYLES = {
   pending_verification: { bg: colors.warningLight, text: colors.warning, label: 'Pending' },
   in_progress: { bg: colors.infoLight, text: colors.info, label: 'In Progress' },
   open: { bg: colors.infoLight, text: colors.info, label: 'Open' },
-};
+});
 
 const StatusChip = ({ status, label, style }) => {
+  const { colors } = useTheme();
+  const STATUS_STYLES = getStatusStyles(colors);
+
   const statusStyle = STATUS_STYLES[status] || {
     bg: colors.surfaceLight,
     text: colors.textSecondary,

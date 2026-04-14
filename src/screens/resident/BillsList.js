@@ -6,13 +6,15 @@ import StatusChip from '../../components/StatusChip';
 import EmptyState from '../../components/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { getMonthName } from '../../utils/formatDate';
 
 const BillsList = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
   const { bills, loadBills } = useBilling();
 
@@ -20,21 +22,21 @@ const BillsList = ({ navigation }) => {
 
   const renderBill = ({ item }) => (
     <Card
-      style={styles.card}
+      style={s.card}
       onPress={() => navigation.navigate('BillDetail', { bill: item })}
     >
-      <View style={styles.row}>
-        <View style={styles.monthBadge}>
-          <Text style={styles.monthText}>{getMonthName(item.month).substring(0, 3)}</Text>
-          <Text style={styles.yearText}>{item.year}</Text>
+      <View style={s.row}>
+        <View style={s.monthBadge}>
+          <Text style={s.monthText}>{getMonthName(item.month).substring(0, 3)}</Text>
+          <Text style={s.yearText}>{item.year}</Text>
         </View>
-        <View style={styles.info}>
-          <Text style={styles.billTitle}>{getMonthName(item.month)} {item.year}</Text>
-          <Text style={styles.flatText}>Flat {item.flatNumber}</Text>
-          <Text style={styles.dueText}>Due: {item.dueDate}</Text>
+        <View style={s.info}>
+          <Text style={s.billTitle}>{getMonthName(item.month)} {item.year}</Text>
+          <Text style={s.flatText}>Flat {item.flatNumber}</Text>
+          <Text style={s.dueText}>Due: {item.dueDate}</Text>
         </View>
-        <View style={styles.right}>
-          <Text style={styles.amount}>{formatCurrency(item.totalAmount)}</Text>
+        <View style={s.right}>
+          <Text style={s.amount}>{formatCurrency(item.totalAmount)}</Text>
           <StatusChip status={item.status} />
         </View>
       </View>
@@ -42,13 +44,13 @@ const BillsList = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="My Bills" onBack={() => navigation.goBack()} />
       <FlatList
         data={bills}
         keyExtractor={(item) => item.id}
         renderItem={renderBill}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState icon="file-document-outline" title="No bills" message="Your bills will appear here" />
@@ -58,7 +60,7 @@ const BillsList = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.md, paddingBottom: spacing.huge },
   card: { marginBottom: spacing.md },

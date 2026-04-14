@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import spacing from '../constants/spacing';
 
 const Card = ({
@@ -10,19 +10,22 @@ const Card = ({
   variant = 'default', // default | elevated | outlined
   padding = spacing.cardPadding,
 }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+
   const getCardStyle = () => {
     switch (variant) {
       case 'elevated':
-        return styles.elevated;
+        return s.elevated;
       case 'outlined':
-        return styles.outlined;
+        return s.outlined;
       default:
-        return styles.default;
+        return s.default;
     }
   };
 
   const content = (
-    <View style={[styles.card, getCardStyle(), { padding }, style]}>
+    <View style={[s.card, getCardStyle(), { padding }, style]}>
       {children}
     </View>
   );
@@ -38,7 +41,7 @@ const Card = ({
   return content;
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   card: {
     borderRadius: spacing.cardRadius,
     overflow: 'hidden',

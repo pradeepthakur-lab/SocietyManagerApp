@@ -7,7 +7,8 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useBilling } from '../../context/BillingContext';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -19,8 +20,12 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const BillGeneration = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { charges, loadCharges, generateBills, loading } = useBilling();
-  const { flats } = useSociety();
+  const { showToast } = useToast();
+  const { flats, society } = useSociety();
+  const arrearsRate = society?.arrearsInterestRate || 0;
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
@@ -49,7 +54,7 @@ const BillGeneration = ({ navigation }) => {
 
   const handleGenerate = async () => {
     if (editableCharges.length === 0) {
-      Alert.alert('Error', 'Please configure at least one charge');
+      showToast('Please configure at least one charge', 'error');
       return;
     }
 
@@ -63,11 +68,8 @@ const BillGeneration = ({ navigation }) => {
           onPress: async () => {
             const result = await generateBills(selectedMonth, selectedYear, editableCharges);
             if (result) {
-              Alert.alert(
-                'Success',
-                `${result.length} bills generated successfully!`,
-                [{ text: 'OK', onPress: () => navigation.goBack() }],
-              );
+              showToast(`${result.length} bills generated successfully!`, 'success');
+              navigation.goBack();
             }
           },
         },
@@ -76,25 +78,25 @@ const BillGeneration = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Generate Bills" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Month Selector */}
-        <Text style={styles.sectionTitle}>Billing Period</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.monthScroll}>
+        <Text style={s.sectionTitle}>Billing Period</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.monthScroll}>
           {MONTHS.map((m) => (
             <TouchableOpacity
               key={m.value}
               style={[
-                styles.monthChip,
-                selectedMonth === m.value && styles.monthChipActive,
+                s.monthChip,
+                selectedMonth === m.value && s.monthChipActive,
               ]}
               onPress={() => setSelectedMonth(m.value)}
             >
               <Text
                 style={[
-                  styles.monthText,
-                  selectedMonth === m.value && styles.monthTextActive,
+                  s.monthText,
+                  selectedMonth === m.value && s.monthTextActive,
                 ]}
               >
                 {m.label.substring(0, 3)}
@@ -113,18 +115,18 @@ const BillGeneration = ({ navigation }) => {
         />
 
         {/* Charges */}
-        <Text style={styles.sectionTitle}>Charges Configuration</Text>
+        <Text style={s.sectionTitle}>Charges Configuration</Text>
         {editableCharges.map((charge, index) => (
-          <Card key={charge.id} style={styles.chargeCard}>
-            <View style={styles.chargeRow}>
-              <Text style={styles.chargeName}>{charge.name}</Text>
-              <View style={styles.chargeInput}>
-                <Text style={styles.currencySymbol}>₹</Text>
+          <Card key={charge.id} style={s.chargeCard}>
+            <View style={s.chargeRow}>
+              <Text style={s.chargeName}>{charge.name}</Text>
+              <View style={s.chargeInput}>
+                <Text style={s.currencySymbol}>₹</Text>
                 <Input
                   value={charge.amount.toString()}
                   onChangeText={(v) => updateChargeAmount(index, v)}
                   keyboardType="number-pad"
-                  style={styles.chargeInputField}
+                  style={s.chargeInputField}
                 />
               </View>
             </View>
@@ -132,28 +134,36 @@ const BillGeneration = ({ navigation }) => {
         ))}
 
         {/* Summary */}
-        <Card variant="elevated" style={styles.summaryCard}>
-          <View style={styles.summaryHeader}>
+        <Card variant="elevated" style={s.summaryCard}>
+          <View style={s.summaryHeader}>
             <Icon name="calculator" size={24} color={colors.primary} />
-            <Text style={styles.summaryTitle}>Bill Summary</Text>
+            <Text style={s.summaryTitle}>Bill Summary</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Period</Text>
-            <Text style={styles.summaryValue}>{getMonthName(selectedMonth)} {selectedYear}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Period</Text>
+            <Text style={s.summaryValue}>{getMonthName(selectedMonth)} {selectedYear}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Occupied Flats</Text>
-            <Text style={styles.summaryValue}>{occupiedFlats.length}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Occupied Flats</Text>
+            <Text style={s.summaryValue}>{occupiedFlats.length}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Per Flat</Text>
-            <Text style={styles.summaryValue}>{formatCurrency(totalPerFlat)}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Per Flat</Text>
+            <Text style={s.summaryValue}>{formatCurrency(totalPerFlat)}</Text>
           </View>
-          <View style={styles.divider} />
-          <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Total Collection</Text>
-            <Text style={styles.totalValue}>{formatCurrency(totalAll)}</Text>
+          <View style={s.divider} />
+          <View style={s.summaryRow}>
+            <Text style={s.totalLabel}>Total Collection</Text>
+            <Text style={s.totalValue}>{formatCurrency(totalAll)}</Text>
           </View>
+          {arrearsRate > 0 && (
+            <View style={s.arrearsNote}>
+              <Icon name="information-outline" size={16} color={colors.warning} />
+              <Text style={s.arrearsNoteText}>
+                Unpaid bills will be auto-added as arrears + {arrearsRate}% interest
+              </Text>
+            </View>
+          )}
         </Card>
 
         <Button
@@ -163,6 +173,13 @@ const BillGeneration = ({ navigation }) => {
           icon="file-document-multiple"
           style={{ marginTop: spacing.lg }}
         />
+        <Button
+          title="View & Share Invoices"
+          variant="outline"
+          icon="file-pdf-box"
+          onPress={() => navigation.navigate('BillInvoice')}
+          style={{ marginTop: spacing.md }}
+        />
 
         <View style={{ height: spacing.huge }} />
       </ScrollView>
@@ -170,7 +187,7 @@ const BillGeneration = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   sectionTitle: {
@@ -261,6 +278,21 @@ const styles = StyleSheet.create({
   totalValue: {
     ...typography.h4,
     color: colors.primary,
+  },
+  arrearsNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: colors.warningLight,
+    padding: spacing.md,
+    borderRadius: spacing.radiusSmall,
+    marginTop: spacing.md,
+  },
+  arrearsNoteText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    flex: 1,
+    marginLeft: spacing.sm,
+    lineHeight: 18,
   },
 });
 

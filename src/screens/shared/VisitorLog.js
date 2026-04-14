@@ -7,12 +7,14 @@ import StatusChip from '../../components/StatusChip';
 import EmptyState from '../../components/EmptyState';
 import Button from '../../components/Button';
 import visitorService from '../../services/visitorService';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatDate, formatTime } from '../../utils/formatDate';
 
 const VisitorLog = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const [visitors, setVisitors] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(false);
@@ -70,11 +72,11 @@ const VisitorLog = ({ navigation }) => {
 
   const renderVisitor = ({ item }) => (
     <Card
-      style={styles.card}
+      style={s.card}
       onPress={() => navigation.navigate('VisitorDetail', { visitor: item })}
     >
-      <View style={styles.cardHeader}>
-        <View style={[styles.purposeIcon, {
+      <View style={s.cardHeader}>
+        <View style={[s.purposeIcon, {
           backgroundColor: item.status === 'checked_in' ? colors.successLight : colors.surfaceLight,
         }]}>
           <Icon
@@ -83,43 +85,43 @@ const VisitorLog = ({ navigation }) => {
             color={item.status === 'checked_in' ? colors.success : colors.textMuted}
           />
         </View>
-        <View style={styles.info}>
-          <Text style={styles.visitorName}>{item.visitorName}</Text>
-          <Text style={styles.meta}>
+        <View style={s.info}>
+          <Text style={s.visitorName}>{item.visitorName}</Text>
+          <Text style={s.meta}>
             {item.purpose} • Flat {item.visitingFlat}
           </Text>
-          <Text style={styles.time}>
+          <Text style={s.time}>
             In: {formatTime(item.checkedInAt)}
             {item.checkedOutAt ? ` • Out: ${formatTime(item.checkedOutAt)}` : ''}
           </Text>
         </View>
-        <View style={styles.right}>
+        <View style={s.right}>
           <StatusChip
             status={item.status === 'checked_in' ? 'open' : 'resolved'}
             label={item.status === 'checked_in' ? 'Active' : 'Left'}
           />
           {item.status === 'checked_in' && (
             <TouchableOpacity
-              style={styles.checkoutBtn}
+              style={s.checkoutBtn}
               onPress={() => handleCheckout(item.id)}
             >
               <Icon name="logout" size={16} color={colors.danger} />
-              <Text style={styles.checkoutText}>Out</Text>
+              <Text style={s.checkoutText}>Out</Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
       {item.vehicleNumber ? (
-        <View style={styles.vehicleTag}>
+        <View style={s.vehicleTag}>
           <Icon name="car" size={12} color={colors.textMuted} />
-          <Text style={styles.vehicleText}>{item.vehicleNumber}</Text>
+          <Text style={s.vehicleText}>{item.vehicleNumber}</Text>
         </View>
       ) : null}
     </Card>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Visitor Log"
         subtitle={`${stats.active} active now`}
@@ -129,28 +131,28 @@ const VisitorLog = ({ navigation }) => {
       />
 
       {/* Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statChip}>
+      <View style={s.statsRow}>
+        <View style={s.statChip}>
           <Icon name="account-arrow-right" size={18} color={colors.success} />
-          <Text style={styles.statValue}>{stats.active}</Text>
-          <Text style={styles.statLabel}>Inside</Text>
+          <Text style={s.statValue}>{stats.active}</Text>
+          <Text style={s.statLabel}>Inside</Text>
         </View>
-        <View style={styles.statChip}>
+        <View style={s.statChip}>
           <Icon name="account-clock" size={18} color={colors.info} />
-          <Text style={styles.statValue}>{stats.today}</Text>
-          <Text style={styles.statLabel}>Today</Text>
+          <Text style={s.statValue}>{stats.today}</Text>
+          <Text style={s.statLabel}>Today</Text>
         </View>
       </View>
 
       {/* Filters */}
-      <View style={styles.filterRow}>
+      <View style={s.filterRow}>
         {filters.map((f) => (
           <TouchableOpacity
             key={f.key}
-            style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+            style={[s.filterChip, filter === f.key && s.filterChipActive]}
             onPress={() => setFilter(f.key)}
           >
-            <Text style={[styles.filterText, filter === f.key && styles.filterTextActive]}>
+            <Text style={[s.filterText, filter === f.key && s.filterTextActive]}>
               {f.label}
             </Text>
           </TouchableOpacity>
@@ -161,7 +163,7 @@ const VisitorLog = ({ navigation }) => {
         data={visitors}
         keyExtractor={(item) => item.id}
         renderItem={renderVisitor}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
@@ -183,7 +185,7 @@ const VisitorLog = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   statsRow: {
     flexDirection: 'row',

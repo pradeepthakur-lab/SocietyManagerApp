@@ -1,20 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
-import typography from '../constants/typography';
+import { useTheme } from '../context/ThemeContext';
 
-const Badge = ({ count, size = 'medium', color = colors.danger, style }) => {
+const Badge = ({ count, size = 'medium', color, style }) => {
+  const { colors } = useTheme();
   if (!count || count <= 0) return null;
 
   const isSmall = size === 'small';
   const displayCount = count > 99 ? '99+' : count.toString();
+  const bgColor = color || colors.danger;
 
   return (
     <View
       style={[
         styles.badge,
         {
-          backgroundColor: color,
+          backgroundColor: bgColor,
           minWidth: isSmall ? 16 : 20,
           height: isSmall ? 16 : 20,
           borderRadius: isSmall ? 8 : 10,
@@ -26,7 +27,7 @@ const Badge = ({ count, size = 'medium', color = colors.danger, style }) => {
       <Text
         style={[
           styles.text,
-          { fontSize: isSmall ? 9 : 11 },
+          { fontSize: isSmall ? 9 : 11, color: colors.white },
         ]}
       >
         {displayCount}
@@ -44,7 +45,6 @@ const styles = StyleSheet.create({
     right: -8,
   },
   text: {
-    color: colors.white,
     fontWeight: '700',
     textAlign: 'center',
   },

@@ -6,11 +6,13 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import Button from '../../components/Button';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 
 const FlatManagement = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { flats, loadFlats, loading } = useSociety();
   const [filter, setFilter] = useState('all');
 
@@ -31,9 +33,9 @@ const FlatManagement = ({ navigation }) => {
   ];
 
   const renderFlat = ({ item }) => (
-    <Card style={styles.flatCard} onPress={() => {}}>
-      <View style={styles.flatRow}>
-        <View style={[styles.flatIcon, {
+    <Card style={s.flatCard} onPress={() => {}}>
+      <View style={s.flatRow}>
+        <View style={[s.flatIcon, {
           backgroundColor: item.status === 'occupied' ? colors.successLight : colors.warningLight,
         }]}>
           <Icon
@@ -42,13 +44,13 @@ const FlatManagement = ({ navigation }) => {
             color={item.status === 'occupied' ? colors.success : colors.warning}
           />
         </View>
-        <View style={styles.flatInfo}>
-          <Text style={styles.flatNumber}>{item.flatNumber}</Text>
-          <Text style={styles.flatMeta}>
+        <View style={s.flatInfo}>
+          <Text style={s.flatNumber}>{item.flatNumber}</Text>
+          <Text style={s.flatMeta}>
             {item.building} • Floor {item.floor} • {item.areaSqft} sq.ft
           </Text>
         </View>
-        <View style={[styles.statusDot, {
+        <View style={[s.statusDot, {
           backgroundColor: item.status === 'occupied' ? colors.success : colors.warning,
         }]} />
       </View>
@@ -56,7 +58,7 @@ const FlatManagement = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Flat Management"
         onBack={() => navigation.goBack()}
@@ -65,14 +67,14 @@ const FlatManagement = ({ navigation }) => {
       />
 
       {/* Filters */}
-      <View style={styles.filterRow}>
+      <View style={s.filterRow}>
         {filters.map((f) => (
           <TouchableOpacity
             key={f.key}
-            style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+            style={[s.filterChip, filter === f.key && s.filterChipActive]}
             onPress={() => setFilter(f.key)}
           >
-            <Text style={[styles.filterText, filter === f.key && styles.filterTextActive]}>
+            <Text style={[s.filterText, filter === f.key && s.filterTextActive]}>
               {f.label}
             </Text>
           </TouchableOpacity>
@@ -83,7 +85,7 @@ const FlatManagement = ({ navigation }) => {
         data={filteredFlats}
         keyExtractor={(item) => item.id}
         renderItem={renderFlat}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={s.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <EmptyState
@@ -105,7 +107,7 @@ const FlatManagement = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

@@ -4,12 +4,16 @@ import Header from '../../components/Header';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useSociety } from '../../context/SocietyContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import spacing from '../../constants/spacing';
 import typography from '../../constants/typography';
 
 const AddFlat = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { addFlat, buildings } = useSociety();
+  const { showToast } = useToast();
   const [flatNumber, setFlatNumber] = useState('');
   const [building, setBuilding] = useState(buildings[0]?.name || '');
   const [floor, setFloor] = useState('');
@@ -18,7 +22,7 @@ const AddFlat = ({ navigation }) => {
 
   const handleAdd = async () => {
     if (!flatNumber.trim()) {
-      Alert.alert('Error', 'Flat number is required');
+      showToast('Flat number is required', 'error');
       return;
     }
     setLoading(true);
@@ -30,16 +34,15 @@ const AddFlat = ({ navigation }) => {
     });
     setLoading(false);
     if (success) {
-      Alert.alert('Success', 'Flat added successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      showToast('Flat added successfully', 'success');
+      navigation.goBack();
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Add Flat" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={s.content}>
         <Input
           label="Flat Number"
           value={flatNumber}
@@ -82,7 +85,7 @@ const AddFlat = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.lg },
 });

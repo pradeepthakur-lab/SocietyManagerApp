@@ -7,7 +7,8 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -22,9 +23,12 @@ const methodOptions = [
 ];
 
 const SubmitPayment = ({ route, navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { bill } = route.params;
   const { user } = useAuth();
   const { submitPayment } = useBilling();
+  const { showToast } = useToast();
 
   const [method, setMethod] = useState(PAYMENT_METHODS.UPI);
   const [transactionId, setTransactionId] = useState('');
@@ -58,15 +62,15 @@ const SubmitPayment = ({ route, navigation }) => {
   const handleSubmit = async () => {
     // Validation
     if (method === PAYMENT_METHODS.UPI && !transactionId.trim()) {
-      Alert.alert('Error', 'UPI Transaction ID is required');
+      showToast('UPI Transaction ID is required', 'error');
       return;
     }
     if (method === PAYMENT_METHODS.BANK_TRANSFER && !referenceNumber.trim()) {
-      Alert.alert('Error', 'Reference number is required');
+      showToast('Reference number is required', 'error');
       return;
     }
     if (method === PAYMENT_METHODS.CHEQUE && !chequeNumber.trim()) {
-      Alert.alert('Error', 'Cheque number is required');
+      showToast('Cheque number is required', 'error');
       return;
     }
 
@@ -90,32 +94,31 @@ const SubmitPayment = ({ route, navigation }) => {
     setLoading(false);
 
     if (success) {
-      Alert.alert(
-        'Payment Submitted! ✅',
-        'Your payment details have been submitted for verification. You will be notified once the admin approves it.',
-        [{ text: 'OK', onPress: () => navigation.popToTop() }],
-      );
+      showToast('Payment submitted for verification', 'success');
+      navigation.popToTop();
+    } else {
+      showToast('Failed to submit payment', 'error');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Submit Payment" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Amount Summary */}
-        <Card variant="elevated" style={styles.amountCard}>
-          <Text style={styles.amountLabel}>Amount to Pay</Text>
-          <Text style={styles.amount}>{formatCurrency(bill.totalAmount + bill.lateFee)}</Text>
-          <Text style={styles.billRef}>Bill: {bill.flatNumber} • {bill.id}</Text>
+        <Card variant="elevated" style={s.amountCard}>
+          <Text style={s.amountLabel}>Amount to Pay</Text>
+          <Text style={s.amount}>{formatCurrency(bill.totalAmount + bill.lateFee)}</Text>
+          <Text style={s.billRef}>Bill: {bill.flatNumber} • {bill.id}</Text>
         </Card>
 
         {/* Payment Method */}
-        <Text style={styles.sectionTitle}>Payment Method</Text>
-        <View style={styles.methodGrid}>
+        <Text style={s.sectionTitle}>Payment Method</Text>
+        <View style={s.methodGrid}>
           {methodOptions.map((opt) => (
             <TouchableOpacity
               key={opt.key}
-              style={[styles.methodCard, method === opt.key && styles.methodCardActive]}
+              style={[s.methodCard, method === opt.key && s.methodCardActive]}
               onPress={() => setMethod(opt.key)}
               activeOpacity={0.7}
             >
@@ -124,24 +127,24 @@ const SubmitPayment = ({ route, navigation }) => {
                 size={24}
                 color={method === opt.key ? colors.primary : colors.textMuted}
               />
-              <Text style={[styles.methodLabel, method === opt.key && styles.methodLabelActive]}>
+              <Text style={[s.methodLabel, method === opt.key && s.methodLabelActive]}>
                 {opt.label}
               </Text>
               {method === opt.key && (
-                <Icon name="check-circle" size={16} color={colors.primary} style={styles.methodCheck} />
+                <Icon name="check-circle" size={16} color={colors.primary} style={s.methodCheck} />
               )}
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Dynamic Fields */}
-        <Text style={styles.sectionTitle}>Payment Details</Text>
+        <Text style={s.sectionTitle}>Payment Details</Text>
 
         {hasBankDetails && (
-          <Card style={styles.prefillBanner}>
-            <View style={styles.prefillRow}>
+          <Card style={s.prefillBanner}>
+            <View style={s.prefillRow}>
               <Icon name="check-decagram" size={16} color={colors.success} />
-              <Text style={styles.prefillText}>
+              <Text style={s.prefillText}>
                 Bank details auto-filled from your saved info ({bankName})
               </Text>
             </View>
@@ -184,7 +187,7 @@ const SubmitPayment = ({ route, navigation }) => {
           style={{ marginTop: spacing.lg }}
         />
 
-        <Text style={styles.disclaimer}>
+        <Text style={s.disclaimer}>
           After submission, the admin will verify your payment against their bank records. You will be notified of the result.
         </Text>
 
@@ -194,7 +197,7 @@ const SubmitPayment = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   amountCard: { padding: spacing.lg, alignItems: 'center', marginBottom: spacing.lg },

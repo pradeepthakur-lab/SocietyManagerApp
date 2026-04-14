@@ -8,18 +8,15 @@ import Input from '../../components/Input';
 import BottomSheet from '../../components/BottomSheet';
 import EmptyState from '../../components/EmptyState';
 import { useNotifications } from '../../context/NotificationContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatDate } from '../../utils/formatDate';
 
-const priorityColors = {
-  high: colors.danger,
-  medium: colors.warning,
-  low: colors.info,
-};
-
 const Notices = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+  const priorityColors = { high: colors.danger, medium: colors.warning, low: colors.info };
   const { notices, loadNotices, addNotice } = useNotifications();
   const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState('');
@@ -37,20 +34,20 @@ const Notices = ({ navigation }) => {
   };
 
   const renderNotice = ({ item }) => (
-    <Card style={styles.card}>
-      <View style={styles.header}>
-        <View style={[styles.priorityBar, { backgroundColor: priorityColors[item.priority] || colors.info }]} />
-        <View style={styles.info}>
-          <Text style={styles.noticeTitle}>{item.title}</Text>
-          <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
+    <Card style={s.card}>
+      <View style={s.header}>
+        <View style={[s.priorityBar, { backgroundColor: priorityColors[item.priority] || colors.info }]} />
+        <View style={s.info}>
+          <Text style={s.noticeTitle}>{item.title}</Text>
+          <Text style={s.date}>{formatDate(item.createdAt)}</Text>
         </View>
       </View>
-      <Text style={styles.content}>{item.content}</Text>
+      <Text style={s.content}>{item.content}</Text>
     </Card>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Notice Board"
         onBack={() => navigation.goBack()}
@@ -61,15 +58,15 @@ const Notices = ({ navigation }) => {
         data={notices}
         keyExtractor={(item) => item.id}
         renderItem={renderNotice}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<EmptyState icon="bullhorn" title="No notices" message="Post announcements for residents" />}
       />
       <BottomSheet visible={showAdd} onClose={() => setShowAdd(false)} title="New Notice" height="70%">
         <Input label="Title" value={title} onChangeText={setTitle} placeholder="Notice title" icon="text-box" />
         <Input label="Content" value={content} onChangeText={setContent} placeholder="Notice details..." icon="text" multiline numberOfLines={4} />
-        <Text style={styles.priorityLabel}>Priority</Text>
-        <View style={styles.priorityRow}>
+        <Text style={s.priorityLabel}>Priority</Text>
+        <View style={s.priorityRow}>
           {['low', 'medium', 'high'].map((p) => (
             <Button
               key={p}
@@ -88,7 +85,7 @@ const Notices = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.md, paddingBottom: spacing.huge },
   card: { marginBottom: spacing.md },

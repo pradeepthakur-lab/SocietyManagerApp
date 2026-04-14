@@ -96,3 +96,15 @@ To learn more about React Native, take a look at the following resources:
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 # SocietyManagerApp
+
+Mobile	    Role	    Name
+9876543210	admin	    Rajesh Sharma
+9876543211	resident	Priya Patel
+9876543212	resident	Amit Kumar
+
+open -a /Applications/Android\ Studio.app
+
+docker compose down -v && docker compose up -d --build
+
+cd android && ./gradlew clean && cd ..
+npx react-native run-android

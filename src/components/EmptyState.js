@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import colors from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
@@ -12,19 +12,22 @@ const EmptyState = ({
   children,
   style,
 }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+
   return (
-    <View style={[styles.container, style]}>
-      <View style={styles.iconContainer}>
+    <View style={[s.container, style]}>
+      <View style={s.iconContainer}>
         <Icon name={icon} size={56} color={colors.textMuted} />
       </View>
-      <Text style={styles.title}>{title}</Text>
-      {message ? <Text style={styles.message}>{message}</Text> : null}
-      {children && <View style={styles.action}>{children}</View>}
+      <Text style={s.title}>{title}</Text>
+      {message ? <Text style={s.message}>{message}</Text> : null}
+      {children && <View style={s.action}>{children}</View>}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',

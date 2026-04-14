@@ -7,7 +7,8 @@ import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import vehicleService from '../../services/vehicleService';
 import { ADMIN_ROLES, MANAGER_ROLES } from '../../constants/roles';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -15,17 +16,20 @@ import { formatCurrency } from '../../utils/formatCurrency';
 const typeIcons = { two_wheeler: 'motorbike', four_wheeler: 'car', other: 'truck' };
 const typeLabels = { two_wheeler: '2-Wheeler', four_wheeler: '4-Wheeler', other: 'Other' };
 
-const DetailRow = ({ icon, label, value }) => (
-  <View style={styles.detailRow}>
-    <Icon name={icon} size={18} color={colors.textMuted} style={{ marginRight: spacing.sm }} />
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value || '—'}</Text>
-  </View>
-);
-
 const VehicleDetail = ({ route, navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
+
+  const DetailRow = ({ icon, label, value }) => (
+    <View style={s.detailRow}>
+      <Icon name={icon} size={18} color={colors.textMuted} style={{ marginRight: spacing.sm }} />
+      <Text style={s.detailLabel}>{label}</Text>
+      <Text style={s.detailValue}>{value || '—'}</Text>
+    </View>
+  );
   const { vehicle } = route.params;
   const { user } = useAuth();
+  const { showToast } = useToast();
   const canDelete = MANAGER_ROLES.includes(user?.role) || user?.id === vehicle.residentId;
 
   const handleDelete = () => {
@@ -39,9 +43,8 @@ const VehicleDetail = ({ route, navigation }) => {
           style: 'destructive',
           onPress: async () => {
             await vehicleService.removeVehicle(vehicle.id);
-            Alert.alert('Done', 'Vehicle removed', [
-              { text: 'OK', onPress: () => navigation.goBack() },
-            ]);
+            showToast('Vehicle removed', 'success');
+            navigation.goBack();
           },
         },
       ],
@@ -49,13 +52,13 @@ const VehicleDetail = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Vehicle Details" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <Card variant="elevated" style={styles.headerCard}>
-          <View style={styles.headerRow}>
-            <View style={[styles.iconWrap, {
+        <Card variant="elevated" style={s.headerCard}>
+          <View style={s.headerRow}>
+            <View style={[s.iconWrap, {
               backgroundColor: vehicle.type === 'four_wheeler' ? colors.primaryGlow : colors.successLight,
             }]}>
               <Icon
@@ -64,21 +67,21 @@ const VehicleDetail = ({ route, navigation }) => {
                 color={vehicle.type === 'four_wheeler' ? colors.primary : colors.success}
               />
             </View>
-            <View style={styles.headerInfo}>
-              <Text style={styles.vehicleNumber}>{vehicle.vehicleNumber}</Text>
-              <Text style={styles.typeText}>{typeLabels[vehicle.type]}</Text>
+            <View style={s.headerInfo}>
+              <Text style={s.vehicleNumber}>{vehicle.vehicleNumber}</Text>
+              <Text style={s.typeText}>{typeLabels[vehicle.type]}</Text>
             </View>
           </View>
-          <View style={styles.chargeBanner}>
+          <View style={s.chargeBanner}>
             <Icon name="currency-inr" size={16} color={colors.primary} />
-            <Text style={styles.chargeText}>
+            <Text style={s.chargeText}>
               Monthly Parking: {formatCurrency(vehicle.monthlyCharge)}
             </Text>
           </View>
         </Card>
 
         {/* Details */}
-        <Text style={styles.sectionTitle}>Vehicle Information</Text>
+        <Text style={s.sectionTitle}>Vehicle Information</Text>
         <Card>
           <DetailRow icon="car-cog" label="Make/Model" value={vehicle.make} />
           <DetailRow icon="palette" label="Color" value={vehicle.color} />
@@ -86,13 +89,13 @@ const VehicleDetail = ({ route, navigation }) => {
           <DetailRow icon="parking" label="Parking Slot" value={vehicle.parkingSlot} />
         </Card>
 
-        <Text style={styles.sectionTitle}>Owner Details</Text>
+        <Text style={s.sectionTitle}>Owner Details</Text>
         <Card>
           <DetailRow icon="account" label="Owner" value={vehicle.residentName} />
           <DetailRow icon="door" label="Flat" value={vehicle.flatNumber} />
         </Card>
 
-        <Text style={styles.sectionTitle}>Billing</Text>
+        <Text style={s.sectionTitle}>Billing</Text>
         <Card>
           <DetailRow icon="cash" label="Monthly" value={formatCurrency(vehicle.monthlyCharge)} />
           <DetailRow icon="calendar" label="Annual" value={formatCurrency(vehicle.monthlyCharge * 12)} />
@@ -114,7 +117,7 @@ const VehicleDetail = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   headerCard: { padding: spacing.lg },

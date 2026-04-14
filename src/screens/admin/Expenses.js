@@ -8,7 +8,8 @@ import Input from '../../components/Input';
 import BottomSheet from '../../components/BottomSheet';
 import EmptyState from '../../components/EmptyState';
 import { useBilling } from '../../context/BillingContext';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -17,7 +18,10 @@ import { formatDate } from '../../utils/formatDate';
 const CATEGORIES = ['Electricity', 'Staff Salary', 'Cleaning', 'Repair', 'Maintenance', 'Other'];
 
 const Expenses = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { expenses, loadExpenses, addExpense } = useBilling();
+  const { showToast } = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -30,7 +34,7 @@ const Expenses = ({ navigation }) => {
 
   const handleAdd = async () => {
     if (!title.trim() || !amount) {
-      Alert.alert('Error', 'Title and amount are required');
+      showToast('Title and amount are required', 'error');
       return;
     }
     const success = await addExpense({
@@ -44,26 +48,27 @@ const Expenses = ({ navigation }) => {
       setTitle('');
       setAmount('');
       setCategory('');
+      showToast('Expense added successfully', 'success');
     }
   };
 
   const renderExpense = ({ item }) => (
-    <Card style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.iconWrap}>
+    <Card style={s.card}>
+      <View style={s.row}>
+        <View style={s.iconWrap}>
           <Icon name="receipt" size={20} color={colors.accent} />
         </View>
-        <View style={styles.info}>
-          <Text style={styles.expTitle}>{item.title}</Text>
-          <Text style={styles.meta}>{item.category} • {formatDate(item.date)}</Text>
+        <View style={s.info}>
+          <Text style={s.expTitle}>{item.title}</Text>
+          <Text style={s.meta}>{item.category} • {formatDate(item.date)}</Text>
         </View>
-        <Text style={styles.amount}>{formatCurrency(item.amount)}</Text>
+        <Text style={s.amount}>{formatCurrency(item.amount)}</Text>
       </View>
     </Card>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header
         title="Expenses"
         subtitle={`Total: ${formatCurrency(totalExpenses)}`}
@@ -75,7 +80,7 @@ const Expenses = ({ navigation }) => {
         data={expenses}
         keyExtractor={(item) => item.id}
         renderItem={renderExpense}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<EmptyState icon="receipt" title="No expenses" message="Track your society expenses here" />}
       />
@@ -90,7 +95,7 @@ const Expenses = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { paddingHorizontal: spacing.screenHorizontal, paddingTop: spacing.md, paddingBottom: spacing.huge },
   card: { marginBottom: spacing.sm },

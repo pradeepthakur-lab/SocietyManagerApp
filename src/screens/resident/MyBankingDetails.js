@@ -7,12 +7,16 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import authService from '../../services/authService';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 
 const MyBankingDetails = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [accountHolder, setAccountHolder] = useState('');
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
@@ -40,7 +44,7 @@ const MyBankingDetails = ({ navigation }) => {
 
   const handleSave = async () => {
     if (!accountHolder.trim() && !upiId.trim()) {
-      Alert.alert('Error', 'Please fill at least account holder name or UPI ID');
+      showToast('Please fill at least account holder name or UPI ID', 'error');
       return;
     }
 
@@ -56,35 +60,35 @@ const MyBankingDetails = ({ navigation }) => {
 
     if (result.success) {
       setHasSaved(true);
-      Alert.alert('Saved ✅', 'Your banking details have been saved. They will be used when submitting payments.');
+      showToast('Banking details saved successfully', 'success');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Banking Details" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Info Banner */}
-        <Card style={styles.infoBanner}>
-          <View style={styles.bannerRow}>
+        <Card style={s.infoBanner}>
+          <View style={s.bannerRow}>
             <Icon name="information-outline" size={20} color={colors.info} />
-            <Text style={styles.bannerText}>
+            <Text style={s.bannerText}>
               Save your banking details here. They will be auto-filled when you submit a payment.
             </Text>
           </View>
         </Card>
 
         {hasSaved && (
-          <Card variant="elevated" style={styles.savedCard}>
-            <View style={styles.savedHeader}>
+          <Card variant="elevated" style={s.savedCard}>
+            <View style={s.savedHeader}>
               <Icon name="check-decagram" size={20} color={colors.success} />
-              <Text style={styles.savedText}>Banking details saved</Text>
+              <Text style={s.savedText}>Banking details saved</Text>
             </View>
           </Card>
         )}
 
         {/* Bank Account Details */}
-        <Text style={styles.sectionTitle}>Bank Account</Text>
+        <Text style={s.sectionTitle}>Bank Account</Text>
         <Input
           label="Account Holder Name"
           value={accountHolder}
@@ -117,7 +121,7 @@ const MyBankingDetails = ({ navigation }) => {
         />
 
         {/* UPI Details */}
-        <Text style={styles.sectionTitle}>UPI Details</Text>
+        <Text style={s.sectionTitle}>UPI Details</Text>
         <Input
           label="UPI ID"
           value={upiId}
@@ -134,7 +138,7 @@ const MyBankingDetails = ({ navigation }) => {
           style={{ marginTop: spacing.xl }}
         />
 
-        <Text style={styles.disclaimer}>
+        <Text style={s.disclaimer}>
           Your banking details are stored securely and will only be used to auto-fill payment forms. Admin/Manager can see your payment method details when verifying payments.
         </Text>
 
@@ -144,7 +148,7 @@ const MyBankingDetails = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.base },
   infoBanner: {

@@ -7,7 +7,8 @@ import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import vehicleService from '../../services/vehicleService';
 import { VEHICLE_TYPES, VEHICLE_MONTHLY_CHARGES } from '../../constants/roles';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -19,7 +20,10 @@ const vehicleTypeOptions = [
 ];
 
 const AddVehicle = ({ navigation }) => {
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [type, setType] = useState(VEHICLE_TYPES.FOUR_WHEELER);
   const [make, setMake] = useState('');
@@ -34,7 +38,7 @@ const AddVehicle = ({ navigation }) => {
 
   const handleAdd = async () => {
     if (!vehicleNumber.trim()) {
-      Alert.alert('Error', 'Vehicle number is required');
+      showToast('Vehicle number is required', 'error');
       return;
     }
 
@@ -54,23 +58,24 @@ const AddVehicle = ({ navigation }) => {
     setLoading(false);
 
     if (result.success) {
-      Alert.alert('Vehicle Added ✅', `${vehicleNumber} registered.\nMonthly parking charge: ${formatCurrency(monthlyCharge)}`, [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      showToast(`${vehicleNumber} registered. Parking: ${formatCurrency(monthlyCharge)}/mo`, 'success');
+      navigation.goBack();
+    } else {
+      showToast(result.error || 'Failed to register vehicle', 'error');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Header title="Add Vehicle" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* Vehicle Type */}
-        <Text style={styles.label}>Vehicle Type</Text>
-        <View style={styles.typeGrid}>
+        <Text style={s.label}>Vehicle Type</Text>
+        <View style={s.typeGrid}>
           {vehicleTypeOptions.map((opt) => (
             <TouchableOpacity
               key={opt.key}
-              style={[styles.typeCard, type === opt.key && styles.typeCardActive]}
+              style={[s.typeCard, type === opt.key && s.typeCardActive]}
               onPress={() => setType(opt.key)}
               activeOpacity={0.7}
             >
@@ -79,14 +84,14 @@ const AddVehicle = ({ navigation }) => {
                 size={28}
                 color={type === opt.key ? colors.primary : colors.textMuted}
               />
-              <Text style={[styles.typeLabel, type === opt.key && styles.typeLabelActive]}>
+              <Text style={[s.typeLabel, type === opt.key && s.typeLabelActive]}>
                 {opt.label}
               </Text>
-              <Text style={[styles.typeCharge, type === opt.key && styles.typeChargeActive]}>
+              <Text style={[s.typeCharge, type === opt.key && s.typeChargeActive]}>
                 {formatCurrency(opt.charge)}/mo
               </Text>
               {type === opt.key && (
-                <Icon name="check-circle" size={16} color={colors.primary} style={styles.typeCheck} />
+                <Icon name="check-circle" size={16} color={colors.primary} style={s.typeCheck} />
               )}
             </TouchableOpacity>
           ))}
@@ -139,10 +144,10 @@ const AddVehicle = ({ navigation }) => {
         />
 
         {/* Charge Summary */}
-        <View style={styles.chargeSummary}>
+        <View style={s.chargeSummary}>
           <Icon name="currency-inr" size={18} color={colors.primary} />
-          <Text style={styles.chargeText}>
-            Monthly parking: <Text style={styles.chargeAmount}>{formatCurrency(monthlyCharge)}</Text>
+          <Text style={s.chargeText}>
+            Monthly parking: <Text style={s.chargeAmount}>{formatCurrency(monthlyCharge)}</Text>
           </Text>
         </View>
 
@@ -154,7 +159,7 @@ const AddVehicle = ({ navigation }) => {
           style={{ marginTop: spacing.lg }}
         />
 
-        <Text style={styles.note}>
+        <Text style={s.note}>
           Parking charges will be automatically included in monthly bills.
         </Text>
 
@@ -164,7 +169,7 @@ const AddVehicle = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.screenHorizontal, paddingTop: spacing.lg },
   label: { ...typography.subtitle2, color: colors.textSecondary, marginBottom: spacing.md },
