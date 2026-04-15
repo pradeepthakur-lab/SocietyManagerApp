@@ -102,6 +102,16 @@ Mobile	    Role	    Name
 9876543211	resident	Priya Patel
 9876543212	resident	Amit Kumar
 
+Mobile	Role	Name
+9876543210	admin   	Rajesh Sharma
+9876543211	resident	Priya Patel
+9876543212	resident	Amit Kumar
+9876543213	resident	Sneha Reddy
+9876543214	tenant  	Vikram Singh
+9876543215	manager 	Deepak Joshi
+9876543216	security	Ramesh Gupta
+
+
 open -a /Applications/Android\ Studio.app
 
 docker compose down -v && docker compose up -d --build

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AdminStack from './AdminStack';
 import { useTheme } from '../context/ThemeContext';
 import typography from '../constants/typography';
@@ -15,6 +16,8 @@ const Tab = createBottomTabNavigator();
 
 const AdminTabs = () => {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 8);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -23,8 +26,8 @@ const AdminTabs = () => {
           backgroundColor: colors.surface,
           borderTopColor: colors.divider,
           borderTopWidth: 1,
-          height: spacing.tabBarHeight,
-          paddingBottom: 8,
+          height: spacing.tabBarHeight + insets.bottom,
+          paddingBottom: bottomPad,
           paddingTop: 8,
         },
         tabBarActiveTintColor: colors.primary,
