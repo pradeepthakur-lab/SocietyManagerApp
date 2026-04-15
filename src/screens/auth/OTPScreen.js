@@ -156,9 +156,9 @@ const OTPScreen = ({ route, navigation }) => {
             style={s.verifyButton}
           />
 
-          <Text style={s.hint}>
+          {/* <Text style={s.hint}>
             For demo, enter any 4-digit code (e.g. 1234)
-          </Text>
+          </Text> */}
         </View>
       </KeyboardAvoidingView>
     </View>

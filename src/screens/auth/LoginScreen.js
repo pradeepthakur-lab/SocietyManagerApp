@@ -64,6 +64,15 @@ const LoginScreen = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
           bounces={false}
         >
+          {/* Server Settings Button */}
+          <TouchableOpacity
+            style={s.settingsButton}
+            onPress={() => navigation.navigate('ServerSettings')}
+            activeOpacity={0.7}
+          >
+            <Icon name="cog-outline" size={22} color={colors.textMuted} />
+          </TouchableOpacity>
+
           {/* Logo / Branding */}
           <View style={s.brandSection}>
             <View style={s.logoContainer}>
@@ -164,6 +173,16 @@ const makeStyles = (colors) => StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: spacing.screenHorizontal,
     paddingBottom: spacing.xxl,
+  },
+  settingsButton: {
+    alignSelf: 'flex-end',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
   },
   brandSection: {
     alignItems: 'center',

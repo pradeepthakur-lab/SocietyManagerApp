@@ -7,11 +7,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
-  PermissionsAndroid,
+  Share,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import Share from 'react-native-share';
+import RNShare from 'react-native-share';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -24,6 +23,7 @@ import typography from '../../constants/typography';
 import spacing from '../../constants/spacing';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { getMonthName, getMonthNameShort } from '../../utils/formatDate';
+import RNFS from 'react-native-fs';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -67,238 +67,50 @@ const BillInvoice = ({ navigation }) => {
     ? 'All Flats'
     : occupiedFlats.find(f => f.id === selectedFlat)?.flatNumber || 'Select Flat';
 
-  const numberToWords = (num) => {
-    if (num === 0) return 'Zero';
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
-      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-
-    const convert = (n) => {
-      if (n < 20) return ones[n];
-      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
-      if (n < 1000) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convert(n % 100) : '');
-      if (n < 100000) return convert(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + convert(n % 1000) : '');
-      if (n < 10000000) return convert(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + convert(n % 100000) : '');
-      return convert(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + convert(n % 10000000) : '');
-    };
-
-    const rupees = Math.floor(num);
-    const paise = Math.round((num - rupees) * 100);
-    let words = 'Rs. ' + convert(rupees);
-    if (paise > 0) words += ' and ' + convert(paise) + ' Paise';
-    words += ' Only';
-    return words;
-  };
-
-  const generateInvoiceHTML = (invoice) => {
-    const { society, flat, resident, charges, currentTotal, previousDue, lateFee, totalAmount, billNumber, periodStart, periodEnd, dueDate, monthName, year, payments } = invoice;
-
-    const chargeRows = charges.map((c, i) => `
-      <tr>
-        <td style="padding:4px 8px;border:1px solid #000;">${i + 1}</td>
-        <td style="padding:4px 8px;border:1px solid #000;">${c.name}</td>
-        <td style="padding:4px 8px;border:1px solid #000;text-align:right;">${c.amount.toFixed(2)}</td>
-      </tr>
-    `).join('');
-
-    const approvedPayment = payments?.find(p => p.status === 'approved');
-
-    const dueDateFormatted = dueDate ? new Date(dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
-    const billDateFormatted = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-
-    return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 12px; color: #000; padding: 20px; }
-        .container { border: 2px solid #000; padding: 0; }
-        .header { text-align: center; padding: 15px 10px 10px; border-bottom: 2px solid #000; }
-        .header h1 { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
-        .header p { font-size: 10px; color: #333; }
-        .bill-period { text-align: center; padding: 8px; font-weight: bold; font-size: 12px; border-bottom: 1px solid #000; background: #f5f5f5; }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 10px; }
-        .info-row .left { text-align: left; }
-        .info-row .right { text-align: right; }
-        .info-section { padding: 8px 10px; border-bottom: 1px solid #000; }
-        table { width: 100%; border-collapse: collapse; }
-        th { padding: 6px 8px; border: 1px solid #000; background: #f0f0f0; text-align: left; font-size: 11px; }
-        th:last-child { text-align: right; }
-        td { font-size: 11px; }
-        .total-section { padding: 0 10px; }
-        .total-row { display: flex; justify-content: space-between; padding: 4px 0; }
-        .total-row.grand { font-weight: bold; font-size: 14px; border-top: 2px solid #000; padding-top: 6px; margin-top: 4px; }
-        .amount-words { padding: 8px 10px; border-top: 1px solid #000; font-weight: bold; font-size: 11px; background: #f9f9f9; }
-        .notes { padding: 10px; border-top: 1px solid #000; font-size: 10px; }
-        .notes p { margin-bottom: 3px; }
-        .notes .title { font-weight: bold; }
-        .footer-sign { text-align: right; padding: 20px 10px 10px; font-weight: bold; font-size: 11px; }
-        .receipt-section { border-top: 3px dashed #000; margin-top: 20px; padding: 15px 10px; }
-        .receipt-section h2 { text-align: center; font-size: 14px; margin-bottom: 4px; }
-        .receipt-section h3 { text-align: center; font-size: 12px; margin-bottom: 10px; letter-spacing: 3px; }
-        .receipt-info { margin-bottom: 10px; font-size: 11px; }
-        .receipt-total { font-size: 16px; font-weight: bold; margin: 5px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <!-- Header -->
-        <div class="header">
-          <h1>${society.name.toUpperCase()}</h1>
-          <p>${society.address || ''}</p>
-        </div>
-
-        <!-- Bill Period -->
-        <div class="bill-period">
-          BILL FOR THE PERIOD OF ${periodStart} To ${periodEnd}
-        </div>
-
-        <!-- Resident & Bill Info -->
-        <div class="info-section">
-          <table style="border:none;">
-            <tr>
-              <td style="border:none;padding:2px 0;"><b>(${flat.flatNumber}) ${resident.name}</b></td>
-              <td style="border:none;padding:2px 0;text-align:right;"><b>BILL NO. : ${billNumber}</b></td>
-            </tr>
-            <tr>
-              <td style="border:none;padding:2px 0;">FLAT NO.: ${flat.flatNumber} &nbsp;&nbsp; AREA: ${flat.areaSqft || '-'} SQ.FEET</td>
-              <td style="border:none;padding:2px 0;text-align:right;">BILL DATE: ${billDateFormatted}</td>
-            </tr>
-            <tr>
-              <td style="border:none;padding:2px 0;">MOB.: ${resident.mobile || ''}</td>
-              <td style="border:none;padding:2px 0;text-align:right;">DUE DATE: ${dueDateFormatted}</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Charges Table -->
-        <div style="padding:0 10px 0;">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:40px;">Sr.</th>
-                <th>PARTICULARS</th>
-                <th style="width:100px;text-align:right;">AMOUNT</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${chargeRows}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Totals -->
-        <div class="total-section" style="padding:8px 10px;">
-          <div class="total-row">
-            <span><b>TOTAL</b></span>
-            <span><b>${currentTotal.toFixed(2)}</b></span>
-          </div>
-          ${previousDue > 0 ? `
-          <div class="total-row">
-            <span>PRINCIPAL ARREARS</span>
-            <span>${previousDue.toFixed(2)}</span>
-          </div>` : ''}
-          ${lateFee > 0 ? `
-          <div class="total-row">
-            <span>INTEREST ARREARS (${society.arrearsInterestRate}%)</span>
-            <span>${lateFee.toFixed(2)}</span>
-          </div>` : ''}
-          <div class="total-row grand">
-            <span>GRAND TOTAL</span>
-            <span>₹ ${totalAmount.toFixed(2)}</span>
-          </div>
-        </div>
-
-        <!-- Amount in Words -->
-        <div class="amount-words">
-          Amount in Words : ${numberToWords(totalAmount)}
-        </div>
-
-        <!-- Notes -->
-        <div class="notes">
-          <p class="title">NOTE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; E.& O.E.</p>
-          <p>1. Payment should be made in favour of ${society.name} & A/c PAYEE ONLY.</p>
-          <p>2. Payment must be made on or before due date of every month.</p>
-          ${society.arrearsInterestRate > 0 ? `<p>3. Interest @${society.arrearsInterestRate}% p.a. will be charged on delayed payments.</p>` : ''}
-          <p>${society.arrearsInterestRate > 0 ? '4' : '3'}. Members are requested to write their name, wing, flat no., date on the reverse of the chq.</p>
-          <p>${society.arrearsInterestRate > 0 ? '5' : '4'}. Receipt will be issued with the next month bill.</p>
-        </div>
-
-        <!-- Society Signature -->
-        <div class="footer-sign">
-          FOR ${society.name.toUpperCase()}
-        </div>
-
-        ${approvedPayment ? `
-        <!-- Receipt Section -->
-        <div class="receipt-section">
-          <h2>${society.name.toUpperCase()}</h2>
-          <h3>R E C E I P T</h3>
-          <div class="receipt-info">
-            <p>RECEIVED WITH THANKS FROM (${flat.flatNumber}) ${resident.name}</p>
-            <p style="margin-top:5px;">SUM OF ${numberToWords(approvedPayment.amount).toUpperCase()}, AGAINST BILL No. ${billNumber}</p>
-          </div>
-          <div class="receipt-total">₹ ${approvedPayment.amount.toFixed(2)}</div>
-          <table style="margin-top:10px;">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Mode</th>
-                <th style="text-align:right;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding:4px 8px;border:1px solid #000;">${approvedPayment.submittedAt ? new Date(approvedPayment.submittedAt).toLocaleDateString('en-IN') : '-'}</td>
-                <td style="padding:4px 8px;border:1px solid #000;">${(approvedPayment.method || 'Online').toUpperCase()}</td>
-                <td style="padding:4px 8px;border:1px solid #000;text-align:right;">${approvedPayment.amount.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="text-align:center;margin-top:15px;font-size:10px;">This is a Computer Generated Invoice no signature required.</p>
-        </div>
-        ` : ''}
-      </div>
-    </body>
-    </html>`;
-  };
-
   const handleGeneratePDF = async (bill) => {
     try {
       setGeneratingPdf(bill.id);
 
-      // Fetch full invoice data
-      const result = await billingService.getBillInvoice(bill.id);
+      const result = await billingService.getBillPDF(bill.id);
+
       if (!result.success) {
-        showToast('Failed to load bill details', 'error');
+        showToast('Failed to generate PDF', 'error');
         return;
       }
 
-      const html = generateInvoiceHTML(result.data);
+      const { base64, fileName } = result.data;
 
-      const options = {
-        html,
-        fileName: `Bill_${bill.flatNumber}_${getMonthNameShort(bill.month)}_${bill.year}`,
-        directory: Platform.OS === 'android' ? 'Downloads' : 'Documents',
-        base64: false,
-      };
+      if (!base64) {
+        throw new Error('Base64 is empty');
+      }
 
-      const pdf = await RNHTMLtoPDF.convert(options);
-      showToast('PDF generated successfully!', 'success');
+      const safeFileName = fileName || `bill_${Date.now()}.pdf`;
+
+      // Write to appropriate directory
+      const dir = Platform.OS === 'android'
+        ? `${RNFS.ExternalStorageDirectoryPath}/Download`
+        : RNFS.DocumentDirectoryPath;
+      await RNFS.mkdir(dir);
+      const filePath = `${dir}/${safeFileName}`;
+      console.log('base64: ', base64);
+
+      await RNFS.writeFile(filePath, base64, 'base64');
+
+      const exists = await RNFS.exists(filePath);
+      if (!exists) {
+        throw new Error('File not created');
+      }
 
       // Share the PDF
-      await Share.open({
-        title: `Bill - ${bill.flatNumber} - ${getMonthName(bill.month)} ${bill.year}`,
-        url: Platform.OS === 'android' ? `file://${pdf.filePath}` : pdf.filePath,
+      await RNShare.open({
+        url: `file://${filePath}`,
         type: 'application/pdf',
-        subject: `Society Bill - ${bill.flatNumber} - ${getMonthName(bill.month)} ${bill.year}`,
-        message: `Hi ${bill.residentName || ''},\n\nPlease find attached your society bill for ${getMonthName(bill.month)} ${bill.year}.\n\nTotal Amount: ${formatCurrency(bill.totalAmount)}\n\nRegards,\nSociety Management`,
+        failOnCancel: false,
       });
+
     } catch (err) {
       if (err?.message !== 'User did not share') {
-        showToast('Error generating PDF', 'error');
+        showToast(err?.message || 'Something went wrong', 'error');
       }
     } finally {
       setGeneratingPdf(null);

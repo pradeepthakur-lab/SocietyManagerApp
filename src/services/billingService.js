@@ -39,6 +39,10 @@ export const billingService = {
     return api.get(`/bills/${billId}/invoice`);
   },
 
+  getBillPDF: async (billId) => {
+    return api.get(`/bills/${billId}/pdf`);
+  },
+
   getExpenses: async () => {
     return api.get('/expenses');
   },

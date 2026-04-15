@@ -108,3 +108,5 @@ docker compose down -v && docker compose up -d --build
 
 cd android && ./gradlew clean && cd ..
 npx react-native run-android
+
+cd android && ./gradlew assembleRelease

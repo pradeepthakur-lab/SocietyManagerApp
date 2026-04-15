@@ -1,12 +1,44 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-// Android emulator → host machine uses 10.0.2.2
-// iOS simulator → localhost works
-// Physical device → replace with your machine's LAN IP (e.g., 192.168.1.100)
-const MANUAL_IP = '192.168.7.6'; // Set this to your computer's IP for physical devices
-const DEFAULT_HOST = MANUAL_IP || (Platform.OS === 'android' ? '10.0.2.2' : 'localhost');
-const API_BASE_URL = `http://${DEFAULT_HOST}:3000/api`;
+// Storage key for custom host
+const HOST_STORAGE_KEY = '@society_api_host';
+const PORT_STORAGE_KEY = '@society_api_port';
+
+// Defaults
+const DEFAULT_HOST = Platform.OS === 'android' ? '192.168.7.11' : 'localhost';
+const DEFAULT_PORT = '3000';
+
+// Cached values (loaded once, updated on save)
+let cachedHost = null;
+let cachedPort = null;
+
+const getApiBaseUrl = async () => {
+  if (cachedHost === null) {
+    const savedHost = await AsyncStorage.getItem(HOST_STORAGE_KEY);
+    const savedPort = await AsyncStorage.getItem(PORT_STORAGE_KEY);
+    cachedHost = savedHost || DEFAULT_HOST;
+    cachedPort = savedPort || DEFAULT_PORT;
+  }
+  return `http://${cachedHost}:${cachedPort}/api`;
+};
+
+// Called from ServerSettings screen to persist and update cache
+const setApiHost = async (host, port) => {
+  await AsyncStorage.setItem(HOST_STORAGE_KEY, host);
+  await AsyncStorage.setItem(PORT_STORAGE_KEY, port || DEFAULT_PORT);
+  cachedHost = host;
+  cachedPort = port || DEFAULT_PORT;
+};
+
+const getApiHost = async () => {
+  const savedHost = await AsyncStorage.getItem(HOST_STORAGE_KEY);
+  const savedPort = await AsyncStorage.getItem(PORT_STORAGE_KEY);
+  return {
+    host: savedHost || DEFAULT_HOST,
+    port: savedPort || DEFAULT_PORT,
+  };
+};
 
 const getToken = async () => {
   try {
@@ -37,7 +69,8 @@ const request = async (method, path, body = null, skipAuth = false) => {
       config.body = JSON.stringify(body);
     }
 
-    const url = `${API_BASE_URL}${path}`;
+    const baseUrl = await getApiBaseUrl();
+    const url = `${baseUrl}${path}`;
     const response = await fetch(url, config);
     const json = await response.json();
 
@@ -53,13 +86,15 @@ const request = async (method, path, body = null, skipAuth = false) => {
 };
 
 const api = {
-  baseUrl: API_BASE_URL,
   get: (path) => request('GET', path),
   post: (path, body) => request('POST', path, body),
   put: (path, body) => request('PUT', path, body),
   del: (path) => request('DELETE', path),
   // Allow skipping auth for login/otp endpoints
   postPublic: (path, body) => request('POST', path, body, true),
+  // Host management
+  setApiHost,
+  getApiHost,
 };
 
 export default api;
