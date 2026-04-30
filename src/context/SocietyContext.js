@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useReducer } from 'react';
 import societyService from '../services/societyService';
+import { useAuth } from './AuthContext';
 
 const SocietyContext = createContext(null);
 
 const initialState = {
+  societies: [],
+  selectedSocietyCode: null,
   society: null,
   buildings: [],
   flats: [],
@@ -15,6 +18,8 @@ const initialState = {
 const ACTIONS = {
   SET_LOADING: 'SET_LOADING',
   SET_ERROR: 'SET_ERROR',
+  SET_SOCIETIES: 'SET_SOCIETIES',
+  SET_SELECTED_SOCIETY_CODE: 'SET_SELECTED_SOCIETY_CODE',
   SET_SOCIETY: 'SET_SOCIETY',
   SET_BUILDINGS: 'SET_BUILDINGS',
   SET_FLATS: 'SET_FLATS',
@@ -32,6 +37,17 @@ const societyReducer = (state, action) => {
       return { ...state, loading: action.payload };
     case ACTIONS.SET_ERROR:
       return { ...state, error: action.payload, loading: false };
+    case ACTIONS.SET_SOCIETIES:
+      return { ...state, societies: action.payload };
+    case ACTIONS.SET_SELECTED_SOCIETY_CODE:
+      return {
+        ...state,
+        selectedSocietyCode: action.payload,
+        society: null,
+        buildings: [],
+        flats: [],
+        residents: [],
+      };
     case ACTIONS.SET_SOCIETY:
       return { ...state, society: action.payload, loading: false };
     case ACTIONS.SET_BUILDINGS:
@@ -67,6 +83,54 @@ const societyReducer = (state, action) => {
 
 export const SocietyProvider = ({ children }) => {
   const [state, dispatch] = useReducer(societyReducer, initialState);
+  const { user } = useAuth();
+
+  const loadSocieties = async () => {
+    const canViewAllSocieties = user?.role === 'admin' || user?.role === 'super_admin';
+
+    if (canViewAllSocieties) {
+      const result = await societyService.getSocieties();
+      if (result.success) {
+        dispatch({ type: ACTIONS.SET_SOCIETIES, payload: result.data });
+        const savedCode = await societyService.getSelectedSocietyCode();
+        if (savedCode) {
+          dispatch({ type: ACTIONS.SET_SELECTED_SOCIETY_CODE, payload: savedCode });
+        } else if (result.data.length > 0) {
+          await selectSociety(result.data[0].code);
+        }
+      }
+      return;
+    }
+
+    // For manager/resident/security: show only their own society
+    const currentSociety = await societyService.getSociety();
+    if (currentSociety.success && currentSociety.data) {
+      dispatch({ type: ACTIONS.SET_SOCIETIES, payload: [currentSociety.data] });
+      const savedCode = await societyService.getSelectedSocietyCode();
+      const societyCode = currentSociety.data.code;
+      if (savedCode) {
+        dispatch({ type: ACTIONS.SET_SELECTED_SOCIETY_CODE, payload: savedCode });
+      } else if (societyCode) {
+        await selectSociety(societyCode);
+      }
+    }
+  };
+
+  const selectSociety = async (code) => {
+    const normalizedCode = code ? String(code).trim().toUpperCase() : null;
+    await societyService.setSelectedSocietyCode(normalizedCode);
+    dispatch({ type: ACTIONS.SET_SELECTED_SOCIETY_CODE, payload: normalizedCode });
+  };
+
+  const createSociety = async (society) => {
+    const result = await societyService.createSociety(society);
+    if (result.success) {
+      dispatch({ type: ACTIONS.SET_SOCIETIES, payload: [...state.societies, result.data] });
+      await selectSociety(result.data.code);
+      return result.data;
+    }
+    return null;
+  };
 
   const loadSociety = async () => {
     dispatch({ type: ACTIONS.SET_LOADING, payload: true });
@@ -148,6 +212,9 @@ export const SocietyProvider = ({ children }) => {
     <SocietyContext.Provider
       value={{
         ...state,
+        loadSocieties,
+        selectSociety,
+        createSociety,
         loadSociety,
         loadBuildings,
         loadFlats,

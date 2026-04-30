@@ -2,27 +2,23 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AdminStack from './AdminStack';
+
+import ManagerStack from './ManagerStack';
+import Settings from '../screens/admin/Settings';
+
 import { useTheme } from '../context/ThemeContext';
-import { useSociety } from '../context/SocietyContext';
 import typography from '../constants/typography';
 import spacing from '../constants/spacing';
 
-// Tab screens
-import Reports from '../screens/admin/Reports';
-import Notices from '../screens/admin/Notices';
-import Settings from '../screens/admin/Settings';
-
 const Tab = createBottomTabNavigator();
 
-const AdminTabs = () => {
+const ManagerTabs = () => {
   const { colors } = useTheme();
-  const { selectedSocietyCode } = useSociety();
   const insets = useSafeAreaInsets();
   const bottomPad = Math.max(insets.bottom, 8);
+
   return (
     <Tab.Navigator
-      key={selectedSocietyCode || 'default'}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -43,29 +39,11 @@ const AdminTabs = () => {
       }}
     >
       <Tab.Screen
-        name="Dashboard"
-        component={AdminStack}
+        name="Users"
+        component={ManagerStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="view-dashboard" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Reports"
-        component={Reports}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="chart-bar" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Notices"
-        component={Notices}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="bullhorn" size={size} color={color} />
+            <Icon name="account-group" size={size} color={color} />
           ),
         }}
       />
@@ -83,4 +61,4 @@ const AdminTabs = () => {
   );
 };
 
-export default AdminTabs;
+export default ManagerTabs;

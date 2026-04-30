@@ -1,6 +1,22 @@
 import api from './api';
 
 export const societyService = {
+  getSocieties: async () => {
+    return api.get('/society/all');
+  },
+
+  createSociety: async (society) => {
+    return api.post('/society', society);
+  },
+
+  setSelectedSocietyCode: async (code) => {
+    return api.setSelectedSocietyCode(code);
+  },
+
+  getSelectedSocietyCode: async () => {
+    return api.getSelectedSocietyCode();
+  },
+
   getSociety: async () => {
     return api.get('/society');
   },
@@ -39,6 +55,10 @@ export const societyService = {
 
   getResidents: async () => {
     return api.get('/residents');
+  },
+
+  getUsers: async () => {
+    return api.get('/users');
   },
 
   addResident: async (resident) => {

@@ -1,12 +1,12 @@
 import api from './api';
 
 export const authService = {
-  login: async (mobile, role) => {
-    return api.postPublic('/auth/login', { mobile, role });
+  login: async (mobile, role, societyCode) => {
+    return api.postPublic('/auth/login', { mobile, role, societyCode });
   },
 
-  verifyOTP: async (mobile, otp, role) => {
-    return api.postPublic('/auth/verify-otp', { mobile, otp, role });
+  verifyOTP: async (mobile, otp, role, societyCode) => {
+    return api.postPublic('/auth/verify-otp', { mobile, otp, role, societyCode });
   },
 
   logout: async () => {

@@ -26,8 +26,10 @@ const LoginScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
 
   const [mobile, setMobile] = useState('');
+  const [societyCode, setSocietyCode] = useState('');
   const [selectedRole, setSelectedRole] = useState('resident');
   const [phoneError, setPhoneError] = useState(null);
+  const [societyCodeError, setSocietyCodeError] = useState(null);
 
   const roles = [
     { key: 'resident', label: 'Resident', icon: 'home-account', desc: 'View bills & pay' },
@@ -44,9 +46,15 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
     setPhoneError(null);
-    const result = await login(mobile, selectedRole);
+    const normalizedSocietyCode = societyCode.trim().toUpperCase();
+    if (selectedRole !== 'admin' && !normalizedSocietyCode) {
+      setSocietyCodeError('Society code is required');
+      return;
+    }
+    setSocietyCodeError(null);
+    const result = await login(mobile, selectedRole, selectedRole === 'admin' ? null : normalizedSocietyCode);
     if (result) {
-      navigation.navigate('OTP', { mobile, role: selectedRole });
+      navigation.navigate('OTP', { mobile, role: selectedRole, societyCode: selectedRole === 'admin' ? null : normalizedSocietyCode });
     }
   };
 
@@ -136,6 +144,21 @@ const LoginScreen = ({ navigation }) => {
               maxLength={10}
               error={phoneError}
             />
+
+            {selectedRole !== 'admin' && (
+              <Input
+                label="Society Code"
+                value={societyCode}
+                onChangeText={(text) => {
+                  setSocietyCode(text.toUpperCase().replace(/\s/g, ''));
+                  setSocietyCodeError(null);
+                }}
+                placeholder="Enter society code"
+                icon="office-building-marker"
+                autoCapitalize="characters"
+                error={societyCodeError}
+              />
+            )}
 
             {error && (
               <View style={s.errorBanner}>

@@ -14,7 +14,14 @@ import spacing from '../../constants/spacing';
 const SocietySetup = ({ navigation }) => {
   const { colors } = useTheme();
   const s = makeStyles(colors);
-  const { society, buildings, loadSociety, loadBuildings, updateSociety, addBuilding } = useSociety();
+  const {
+    society,
+    buildings,
+    loadSociety,
+    loadBuildings,
+    updateSociety,
+    addBuilding,
+  } = useSociety();
   const { showToast } = useToast();
 
   const [name, setName] = useState('');

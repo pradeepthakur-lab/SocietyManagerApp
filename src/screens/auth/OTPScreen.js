@@ -22,7 +22,7 @@ const OTP_LENGTH = 4;
 const OTPScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
   const s = makeStyles(colors);
-  const { mobile, role } = route.params;
+  const { mobile, role, societyCode } = route.params;
   const { verifyOTP, loginPending, error, clearError } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -62,7 +62,7 @@ const OTPScreen = ({ route, navigation }) => {
   const handleVerify = async () => {
     const otpString = otp.join('');
     if (otpString.length !== OTP_LENGTH) return;
-    await verifyOTP(mobile, otpString, role);
+    await verifyOTP(mobile, otpString, role, societyCode);
   };
 
   const handleResend = () => {

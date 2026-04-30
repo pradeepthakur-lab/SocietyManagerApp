@@ -4,9 +4,11 @@ import { Platform } from 'react-native';
 // Storage key for custom host
 const HOST_STORAGE_KEY = '@society_api_host';
 const PORT_STORAGE_KEY = '@society_api_port';
+const SELECTED_SOCIETY_CODE_KEY = '@society_selected_code';
 
 // Defaults
-const DEFAULT_HOST = Platform.OS === 'android' ? '192.168.7.11' : 'localhost';
+// const DEFAULT_HOST = Platform.OS === 'android' ? '192.168.7.11' : 'localhost';
+const DEFAULT_HOST = Platform.OS === 'android' ? '192.168.7.6' : 'localhost';
 const DEFAULT_PORT = '3000';
 
 // Cached values (loaded once, updated on save)
@@ -53,6 +55,21 @@ const getToken = async () => {
   return null;
 };
 
+const setSelectedSocietyCode = async (code) => {
+  if (code) {
+    await AsyncStorage.setItem(
+      SELECTED_SOCIETY_CODE_KEY,
+      String(code).trim().toUpperCase()
+    );
+  } else {
+    await AsyncStorage.removeItem(SELECTED_SOCIETY_CODE_KEY);
+  }
+};
+
+const getSelectedSocietyCode = async () => {
+  return AsyncStorage.getItem(SELECTED_SOCIETY_CODE_KEY);
+};
+
 const request = async (method, path, body = null, skipAuth = false) => {
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -61,6 +78,10 @@ const request = async (method, path, body = null, skipAuth = false) => {
       const token = await getToken();
       if (token) {
         headers.Authorization = `Bearer ${token}`;
+      }
+      const selectedSocietyCode = await getSelectedSocietyCode();
+      if (selectedSocietyCode) {
+        headers['X-Society-Code'] = selectedSocietyCode;
       }
     }
 
@@ -95,6 +116,8 @@ const api = {
   // Host management
   setApiHost,
   getApiHost,
+  setSelectedSocietyCode,
+  getSelectedSocietyCode,
 };
 
 export default api;

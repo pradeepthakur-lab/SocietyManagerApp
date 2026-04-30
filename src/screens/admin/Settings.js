@@ -36,6 +36,8 @@ const Settings = ({ navigation }) => {
     {
       title: 'Society',
       items: [
+        { icon: 'swap-horizontal', label: 'Switch Society', onPress: () => navigation.navigate('Dashboard', { screen: 'SocietySwitch' }) },
+        { icon: 'plus-circle', label: 'Create Society', onPress: () => navigation.navigate('Dashboard', { screen: 'CreateSociety' }) },
         { icon: 'city-variant', label: 'Society Setup', onPress: () => navigation.navigate('Dashboard', { screen: 'SocietySetup' }) },
         { icon: 'home-group', label: 'Flat Management', onPress: () => navigation.navigate('Dashboard', { screen: 'FlatManagement' }) },
         { icon: 'account-group', label: 'Resident Management', onPress: () => navigation.navigate('Dashboard', { screen: 'ResidentManagement' }) },

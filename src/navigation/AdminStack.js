@@ -3,6 +3,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import AdminDashboard from '../screens/admin/AdminDashboard';
 import SocietySetup from '../screens/admin/SocietySetup';
+import SocietySwitch from '../screens/admin/SocietySwitch';
+import CreateSociety from '../screens/admin/CreateSociety';
+import SocietyUsers from '../screens/admin/SocietyUsers';
 import FlatManagement from '../screens/admin/FlatManagement';
 import AddFlat from '../screens/admin/AddFlat';
 import ResidentManagement from '../screens/admin/ResidentManagement';
@@ -32,6 +35,9 @@ const AdminStack = () => {
       }}
     >
       <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+      <Stack.Screen name="SocietySwitch" component={SocietySwitch} />
+      <Stack.Screen name="CreateSociety" component={CreateSociety} />
+      <Stack.Screen name="SocietyUsers" component={SocietyUsers} />
       <Stack.Screen name="SocietySetup" component={SocietySetup} />
       <Stack.Screen name="FlatManagement" component={FlatManagement} />
       <Stack.Screen name="AddFlat" component={AddFlat} />

@@ -83,16 +83,16 @@ export const AuthProvider = ({ children }) => {
     loadStoredAuth();
   }, []);
 
-  const login = async (mobile, role) => {
+  const login = async (mobile, role, societyCode) => {
     dispatch({ type: AUTH_ACTIONS.LOGIN_START });
     try {
-      const result = await authService.login(mobile, role);
+      const result = await authService.login(mobile, role, societyCode);
       if (result.success) {
         // Reset loginPending so OTP screen doesn't show a stale loader
         dispatch({ type: AUTH_ACTIONS.LOGIN_OTP_SENT });
         return result.data;
       }
-      dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: 'Login failed' });
+      dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: result.error || 'Login failed' });
       return null;
     } catch (error) {
       dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: error.message });
@@ -100,10 +100,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOTP = async (mobile, otp, role) => {
+  const verifyOTP = async (mobile, otp, role, societyCode) => {
     dispatch({ type: AUTH_ACTIONS.LOGIN_START });
     try {
-      const result = await authService.verifyOTP(mobile, otp, role);
+      const result = await authService.verifyOTP(mobile, otp, role, societyCode);
       if (result.success) {
         const authData = {
           user: result.data.user,

@@ -178,7 +178,7 @@ const AdminDashboard = ({ navigation }) => {
           <QuickAction
             icon="city-variant"
             label="Society"
-            onPress={() => navigation.navigate('SocietySetup')}
+            onPress={() => navigation.navigate('SocietySwitch')}
             color={colors.danger}
           />
           <QuickAction
